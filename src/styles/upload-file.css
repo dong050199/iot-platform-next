@@ -1,0 +1,23 @@
+.react-csv-input {
+	height: 100%;
+	position: relative;
+}
+
+.csv-input {
+  opacity: 0;
+}
+
+.csv-label {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0 20%;
+	text-align: center;
+  font-weight: 500;
+  background: rgba(247, 247, 247, 0.54);
+  color: rgba(0, 0, 0, 0.38);
+  cursor: pointer;
+}

@@ -1,0 +1,10 @@
+export const PAGINATION = {
+	PER_PAGE_OPTIONS: [20, 50, 100],
+	PAGE_SIZE: 20,
+	PAGE: 0,
+	SORT_ASC: "ASC",
+	SORT_DESC: "DESC",
+};
+
+
+export const FORMAT_DATE = 'MM/DD/YYYY';
