@@ -40,6 +40,7 @@ import {
   getListDeviceDataSource,
 } from "../../services/apis/organization";
 import LoginIcon from "@mui/icons-material/Login";
+import { getListRule } from "../../services/apis/rule";
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
@@ -68,18 +69,9 @@ const Dashboard: NextPage = () => {
     sort: PAGINATION.SORT_ASC,
   });
 
-  const {
-    data: dataOrs,
-    isFetching: loadingOrgs,
-    refetch: refetchOrgs,
-  } = useQuery([`create-user-orgs`, filter], async () => createUserOrgs({}), {
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
-
   const { data, isFetching, refetch } = useQuery(
-    [`device-datasource-listing`, filter],
-    async () => getListDeviceDataSource({ filter }),
+    [`rule-listing`, filter],
+    async () => getListRule({ filter }),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -158,8 +150,8 @@ const Dashboard: NextPage = () => {
   const columns = useMemo(
     () => [
       {
-        header: "Device ID",
-        accessorKey: "device_id",
+        header: "Rule ID",
+        accessorKey: "rule_id",
         size: 70,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => (
@@ -169,7 +161,7 @@ const Dashboard: NextPage = () => {
         ),
       },
       {
-        header: "Device Name",
+        header: "Rule Name",
         accessorKey: "name",
         size: 180,
         typeFilter: "includesMultipleFilter",
@@ -290,7 +282,7 @@ const Dashboard: NextPage = () => {
                 m: 1,
               }}
             >
-              Everything Is Already Configured For You
+              Filter Your Message With Our Rule Configuration
             </Typography>
           </Grid>
           <Grid
@@ -344,7 +336,7 @@ const Dashboard: NextPage = () => {
                   size="small"
                   sx={{ m: 3 }}
                   variant="standard"
-                  value={dataOrs?.data?.data?.user_name}
+                  // value={dataOrs?.data?.data?.user_name}
                 />
               </Grid>
               <Grid item>
@@ -358,7 +350,7 @@ const Dashboard: NextPage = () => {
                   size="small"
                   sx={{ m: 3 }}
                   variant="standard"
-                  value={dataOrs?.data?.data?.password}
+                  // value={dataOrs?.data?.data?.password}
                 />
               </Grid>
               <Grid item sx={{ left: 0 }}>
@@ -402,7 +394,7 @@ const Dashboard: NextPage = () => {
           <Box sx={{ pt: "10px", ml: "0px", mb: 3 }}>
             <MuiTable
               columns={columns}
-              data={data?.data?.data?.devices || []}
+              data={data?.data?.data?.rules || []}
               loading={isFetching}
               getRowId={(row: any) => row.awsCampaignID}
               pagination={{
@@ -458,39 +450,8 @@ const Dashboard: NextPage = () => {
                             "&:hover": { backgroundColor: "#ec7211" },
                           }}
                         >
-                          Add Datasource
+                          Add Rule
                         </Button>
-                      </Grid>
-                      <Grid item>
-                        {showLoginInfo ? (
-                          <Button
-                            size="medium"
-                            variant="contained"
-                            onClick={() => {
-                              setShowLoginInfo(false);
-                            }}
-                            sx={{
-                              backgroundColor: "#ec7211",
-                              "&:hover": { backgroundColor: "#ec7211" },
-                            }}
-                          >
-                            Hide Dashboard Login Info
-                          </Button>
-                        ) : (
-                          <Button
-                            size="medium"
-                            variant="contained"
-                            onClick={() => {
-                              setShowLoginInfo(true);
-                            }}
-                            sx={{
-                              backgroundColor: "#ec7211",
-                              "&:hover": { backgroundColor: "#ec7211" },
-                            }}
-                          >
-                            View Dashboard Login Info
-                          </Button>
-                        )}
                       </Grid>
                       <Grid sx={{ ml: "65%", position: "absolute" }} item>
                         <form onSubmit={formik.handleSubmit}>

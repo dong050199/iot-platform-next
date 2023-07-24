@@ -41,7 +41,6 @@ export const equalDateFilter = ({ data, field, value, formatType = FORMAT_DATE }
 });
 
 export const formatDateToString = (date: Date | string, type?: string, isLocal?: boolean) => {
-	//console.log()
 	let result;
 	if (isLocal) {
 		result = moment(date)

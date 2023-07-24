@@ -10,7 +10,7 @@ import {
 import { FC, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "../../redux/actions/user";
-import { removeAccessToken } from "../../utils/cookies";
+import { removeAccessToken, removeUserInfoFromCookie } from "../../utils/cookies";
 import { useRouter } from "next/router";
 import LogoutIcon from "@mui/icons-material/Logout";
 import EmailIcon from "@mui/icons-material/Email";
@@ -34,7 +34,7 @@ export const UserPopover: FC<userButtonPopover> = (props) => {
   };
   const dispatch = useDispatch();
   const handleLogout = () => {
-    dispatch(setUserInfo({}));
+    removeUserInfoFromCookie()
     removeAccessToken();
     router.reload();
   };
@@ -83,7 +83,7 @@ export const UserPopover: FC<userButtonPopover> = (props) => {
                   startIcon={<EmailIcon />}
                   sx={{ p: 2, boxShadow: 2, color: "black" }}
                 >
-                  {props.name}
+                  {props.name.replace(/\+/g,' ')}
                 </Button>
               </Grid>
               <Grid item>

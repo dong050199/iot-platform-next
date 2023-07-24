@@ -18,7 +18,16 @@ import { useFormik } from "formik";
 import { FC, useState } from "react";
 import { useMutation } from "react-query";
 import { registerUser } from "../../services/authentication/authenticationService";
-import {QueryClient,QueryClientProvider} from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { getUserInfo } from "../../services/apis/users";
+import { setUserInfo } from "../../redux/actions/user";
+import { useDispatch } from "react-redux";
+import {
+  removeAccessToken,
+  removeUserInfoFromCookie,
+  setAccessToken,
+  setUserInfoToCookie,
+} from "../../utils/cookies";
 interface IUserRegistration {
   first_name: string;
   last_name: string;
@@ -28,23 +37,13 @@ interface IUserRegistration {
 }
 
 const SignUp: NextPage = () => {
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-  };
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const handleCloseSnackBar = () => {
     setOpenSnackBar(false);
   };
+  const dispatch = useDispatch();
   const [alertType, setAlertType] = useState(ALERT_TYPE.WARNING);
   const [content, setContent] = useState("");
-  const [userRegistration, setUserRegistration] = useState<IUserRegistration>({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    confirm_password: "",
-  });
 
   const formik = useFormik({
     initialValues: {
@@ -55,7 +54,6 @@ const SignUp: NextPage = () => {
       confirm_password: "",
     },
     onSubmit: (values: any) => {
-      console.log(values);
       onApply({ values });
     },
     validationSchema: Yup.object().shape({
@@ -77,23 +75,38 @@ const SignUp: NextPage = () => {
     async (values: any) => {
       try {
         const response: any = await registerUser(values?.values);
-        console.log(response);
         if (response?.status !== 200) {
           setAlertType(ALERT_TYPE.ERROR);
           setOpenSnackBar(true);
-          setContent("Register failed");
+          setContent(response?.errorMessage);
           return false;
         } else {
-          setAlertType(ALERT_TYPE.SUCCESS);
-          setOpenSnackBar(true);
-          setContent("Register successfully");
-          router.push("/home")
-          return true;
+          // set access token
+          setAccessToken(response?.data?.data);
+          // open snack bar for notification
+          const useInfoResponse: any = await getUserInfo();
+          if (useInfoResponse.status !== 200) {
+            setAlertType(ALERT_TYPE.ERROR);
+            setOpenSnackBar(true);
+            setContent("Register failed");
+            return false;
+          } else {
+            setAlertType(ALERT_TYPE.SUCCESS);
+            setOpenSnackBar(true);
+            setContent("Register successfully");
+            // get user info and set to cookies
+            setUserInfoToCookie({
+              email: useInfoResponse?.data?.data?.email,
+              name: useInfoResponse?.data?.data?.full_name,
+            });
+            router.push("/home");
+            return true;
+          }
         }
       } catch (error: any) {
-        setAlertType(ALERT_TYPE.SUCCESS);
+        setAlertType(ALERT_TYPE.ERROR);
         setOpenSnackBar(true);
-        setContent("Register failed");
+        setContent(error?.errorMessage);
         return false;
       }
     }
@@ -244,18 +257,11 @@ const SignUp: NextPage = () => {
   );
 };
 
-SignUp.getLayout = (page: any) => (
-  <>
-  {page}
-  </>
-);
-
-
+SignUp.getLayout = (page: any) => <>{page}</>;
 
 export default SignUp;
 
-
-const ALERT_TYPE = {
+export const ALERT_TYPE = {
   ERROR: "error",
   WARNING: "warning",
   INFO: "info",

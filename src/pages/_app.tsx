@@ -19,9 +19,8 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "../redux/store";
 import { IUser } from "../interfaces/userProfile";
 import { selectUser } from "../redux/selectors/user";
-import { getAccessToken } from "../utils/cookies";
-import { getUserInfo } from "../services/apis/iot-api";
-import { setUserInfo } from "../redux/actions/user";
+import { getAccessToken, getUserInfoFromCookie } from "../utils/cookies";
+import { getUserInfo } from "../services/apis/users";
 import { useRouter } from "next/router";
 
 const queryClient = new QueryClient();
@@ -37,9 +36,7 @@ const MyApp = (props: any) => {
           <QueryClientProvider client={queryClient}>
             <CssBaseline />
             <AuthMiddleware>
-              <MiddlewareProfile>
-                {getLayout(<Component {...pageProps} />)}
-              </MiddlewareProfile>
+              {getLayout(<Component {...pageProps} />)}
             </AuthMiddleware>
           </QueryClientProvider>
         </StyledEngineProvider>
@@ -49,39 +46,3 @@ const MyApp = (props: any) => {
 };
 
 export default MyApp;
-
-const MiddlewareProfile = ({ children }: any) => {
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  // React.useEffect(() => {
-  //   const token = getAccessToken()
-  //   if (!!!token) {
-  //     router.push("/login")
-  //   }
-  // })
-
-  const { isFetching } = useQuery(
-    ["get-user-cache"],
-    () => getUserInfo(),
-    {
-      onSuccess: async ({ data }) => {
-        if (data?.data) {
-          dispatch(
-            setUserInfo({
-              email: data?.data?.email,
-              numberEmail: data?.data.number_email,
-              notification: data?.data.notification,
-              name: data?.data?.full_name,
-            })
-          );
-          return
-        }
-      },
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  return <>{children}</>;
-};

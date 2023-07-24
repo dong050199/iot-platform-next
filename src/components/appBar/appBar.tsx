@@ -36,11 +36,17 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import { getAccessToken, removeAccessToken, setAccessToken } from "../../utils/cookies";
+import {
+  getAccessToken,
+  getUserInfoFromCookie,
+  removeAccessToken,
+  removeUserInfoFromCookie,
+  setAccessToken,
+} from "../../utils/cookies";
 import { useDispatch, useSelector } from "react-redux";
 import { IUser } from "../../interfaces/userProfile";
 import { selectUser } from "../../redux/selectors/user";
-import { getUserInfo } from "../../services/authentication/authenticationService";
+import { getUserInfo } from "../../services/apis/users";
 import { setUserInfo } from "../../redux/actions/user";
 import { UserPopover } from "./userPopover";
 
@@ -54,6 +60,15 @@ export const PersistentDrawerLeftComponent: React.FC<IappBarProps> = (
 ) => {
   const theme = useTheme();
   const router = useRouter();
+  const [userInfo, setUserInfo] = React.useState<IUser>({});
+  React.useEffect(() => {
+    const { email, name } = getUserInfoFromCookie();
+    setUserInfo({
+      name: name,
+      email: email,
+    });
+  }, []);
+
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [openSnackBar, setOpenSnackBar] = React.useState(false);
@@ -64,8 +79,6 @@ export const PersistentDrawerLeftComponent: React.FC<IappBarProps> = (
   const handleSwitchHome = () => {
     router.push("/home");
   };
-
-  const userInfo = useSelector(selectUser);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -87,14 +100,15 @@ export const PersistentDrawerLeftComponent: React.FC<IappBarProps> = (
       path: "/devices",
     },
     {
-      title: "Dashboard",
-      icon: <DashboardRoundedIcon sx={{ color: "white" }} />,
-      path: "/dashboard",
+      title: "Rules",
+      icon: <AssistantDirectionRoundedIcon sx={{ color: "white" }} />,
+      path: "/rules",
     },
+
     {
-      title: "Settings",
+      title: "Dashboard",
       icon: <SettingsRoundedIcon sx={{ color: "white" }} />,
-      path: "/settings",
+      path: "/dashboard",
     },
     {
       title: "Usage",
@@ -106,162 +120,158 @@ export const PersistentDrawerLeftComponent: React.FC<IappBarProps> = (
       icon: <ManageAccountsRoundedIcon sx={{ color: "white" }} />,
       path: "/user-groups",
     },
-    {
-      title: "Pubsub Gateway",
-      icon: <AssistantDirectionRoundedIcon sx={{ color: "white" }} />,
-      path: "/pubsub-gateway",
-    },
   ];
   return (
     <>
-      {loading ? (
-        <h1>LOADING</h1>
-      ) : (
-        <Box sx={{ display: "flex" }}>
-          <CssBaseline />
-          <AppBar
-            elevation={10}
-            style={{ background: "#2E3B55" }}
-            position="fixed"
-            open={open}
-          >
-            <Toolbar>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                edge="start"
-                sx={{ mr: 2, ...(open && { display: "none" }) }}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Button onClick={handleSwitchHome}>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  color={"while"}
-                  style={{ textTransform: "none" }}
-                  sx={{ flexGrow: 1, fontSize: 22, color: "white" }}
-                >
-                  Hura IoT
-                </Typography>
-              </Button>
-
-              <AccountButton {...userInfo} />
-            </Toolbar>
-          </AppBar>
-          <Drawer
-            sx={{
-              width: drawerWidth,
-              flexShrink: 0,
-              "& .MuiDrawer-paper": {
-                background: "#2E3B55",
-                width: drawerWidth,
-                boxSizing: "border-box",
-              },
-            }}
-            elevation={15}
-            variant="persistent"
-            anchor="left"
-            open={open}
-          >
-            <DrawerHeader>
-              <IconButton sx={{ color: "white" }} onClick={handleDrawerClose}>
-                {theme.direction === "ltr" ? (
-                  <ChevronLeftIcon />
-                ) : (
-                  <ChevronRightIcon />
-                )}
-              </IconButton>
-            </DrawerHeader>
-            <Divider />
-            <List>
-              {sidebars.map((sidebar, index) => (
-                <ListItem
-                  sx={{ height: 70, color: "white", fontWeight: "bold" }}
-                  key={sidebar.title}
-                  disablePadding
-                >
-                  <ListItemButton
-                    divider
-                    component="a"
-                    sx={{ background: "#2E3B55", p: 2 }}
-                    onClick={() => {
-                      router.push(sidebar.path);
-                    }}
-                  >
-                    <ListItemIcon>{sidebar.icon}</ListItemIcon>
-                    <ListItemText primary={sidebar.title} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-            <Divider />
-          </Drawer>
-
-          <Main sx={{ p: 0, background:"#eeeeee"}} open={open}  >
-            <DrawerHeader />
-            {props.children}
-          </Main>
-          <Snackbar
-            open={openSnackBar}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackBar}
-          >
-            <Alert
-              onClose={handleCloseSnackBar}
-              severity="info"
-              sx={{ width: "100%" }}
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+        <AppBar
+          elevation={10}
+          style={{ background: "#2E3B55" }}
+          position="fixed"
+          open={open}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={{ mr: 2, ...(open && { display: "none" }) }}
             >
-              You must loggin to see all contents!
-            </Alert>
-          </Snackbar>
-        </Box>
-      )}
+              <MenuIcon />
+            </IconButton>
+            <Button onClick={handleSwitchHome}>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                color={"while"}
+                style={{ textTransform: "none" }}
+                sx={{ flexGrow: 1, fontSize: 22, color: "white" }}
+              >
+                Hura IoT
+              </Typography>
+            </Button>
+            <AccountButton email={userInfo?.email} name={userInfo?.name} />
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              background: "#2E3B55",
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
+          }}
+          elevation={15}
+          variant="persistent"
+          anchor="left"
+          open={open}
+        >
+          <DrawerHeader>
+            <IconButton sx={{ color: "white" }} onClick={handleDrawerClose}>
+              {theme.direction === "ltr" ? (
+                <ChevronLeftIcon />
+              ) : (
+                <ChevronRightIcon />
+              )}
+            </IconButton>
+          </DrawerHeader>
+          <Divider />
+          <List>
+            {sidebars.map((sidebar, index) => (
+              <ListItem
+                sx={{ height: 70, color: "white", fontWeight: "bold" }}
+                key={sidebar.title}
+                disablePadding
+              >
+                <ListItemButton
+                  divider
+                  component="a"
+                  sx={{ background: "#2E3B55", p: 2 }}
+                  onClick={() => {
+                    router.push(sidebar.path);
+                  }}
+                >
+                  <ListItemIcon>{sidebar.icon}</ListItemIcon>
+                  <ListItemText primary={sidebar.title} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+        </Drawer>
+
+        <Main sx={{ p: 0, background: "#eeeeee" }} open={open}>
+          <DrawerHeader />
+          {props.children}
+        </Main>
+        <Snackbar
+          open={openSnackBar}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackBar}
+        >
+          <Alert
+            onClose={handleCloseSnackBar}
+            severity="info"
+            sx={{ width: "100%" }}
+          >
+            You must loggin to see all contents!
+          </Alert>
+        </Snackbar>
+      </Box>
     </>
   );
 };
 
-
-const AccountButton: React.FC<IUser> = (props) => {
+const AccountButton = (props: any) => {
   const router = useRouter();
-  if (props?.email === "" || props?.email === undefined) {
+  if (!!!props.email) {
     return (
       <>
         <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: { xs: "none", md: "flex" } }}></Box>
-        <Button
-          variant="outlined"
-          color="inherit"
-          sx={{
-            m: 1,
-            border: "Highlight",
-            backgroundColor: "#ec7211",
-            "&:hover": { backgroundColor: "#ec7211" },
-          }}
-          onClick={() => {
-            removeAccessToken()
-            router.push("/login");
-          }}
-        >
-          Login
-        </Button>
-        <Button
-          variant="outlined"
-          color="inherit"
-          sx={{
-            m: 1,
-            border: "Highlight",
-            backgroundColor: "#ec7211",
-            "&:hover": { backgroundColor: "#ec7211" },
-          }}
-          onClick={() => {
-            router.push("/signup");
-          }}
-        >
-          Register
-        </Button>
+        <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            sx={{
+              m: 1,
+              border: "Highlight",
+              backgroundColor: "#ec7211",
+              "&:hover": { backgroundColor: "#ec7211" },
+            }}
+            onClick={() => {
+              // remove access toke  and clear props on dispatch
+              removeAccessToken();
+              removeUserInfoFromCookie();
+              // return to home page
+              router.push("/login");
+            }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            sx={{
+              m: 1,
+              border: "Highlight",
+              backgroundColor: "#ec7211",
+              "&:hover": { backgroundColor: "#ec7211" },
+            }}
+            onClick={() => {
+              // remove access toke  and clear props on dispatch
+              removeAccessToken();
+              removeUserInfoFromCookie();
+              router.push("/signup");
+            }}
+          >
+            Register
+          </Button>
+        </Box>
       </>
     );
   } else {
@@ -274,7 +284,7 @@ const AccountButton: React.FC<IUser> = (props) => {
             aria-label="show 4 new mails"
             color="inherit"
           >
-            <Badge badgeContent={props.numberEmail} color="error">
+            <Badge badgeContent={0} color="error">
               <MailIcon />
             </Badge>
           </IconButton>
@@ -283,11 +293,11 @@ const AccountButton: React.FC<IUser> = (props) => {
             aria-label="show 17 new notifications"
             color="inherit"
           >
-            <Badge badgeContent={props.notification} color="error">
+            <Badge badgeContent={0} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
-          <UserPopover email={props.email} name={props.name || ""} />
+          <UserPopover email={props.email || ""} name={props.name || ""} />
         </Box>
       </>
     );

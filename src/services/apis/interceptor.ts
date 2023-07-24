@@ -1,7 +1,8 @@
 import axios from "axios";
-import { getAccessToken } from "../../utils/cookies";
+import { getAccessToken, getUserInfoFromCookie, removeAccessToken, removeUserInfoFromCookie } from "../../utils/cookies";
 import { PATH } from "../../constants/path";
 import { useRouter } from "next/router";
+import { removeAllListeners } from "process";
 
 const baseRequest = axios.create();
 
@@ -24,6 +25,7 @@ baseRequest.interceptors.request.use(
 
 baseRequest.interceptors.response.use(
   (response) => {
+    console.log(response);
     if (response?.status === 401) {
       const router = useRouter();
       router.push(PATH.LOGIN)
@@ -31,9 +33,10 @@ baseRequest.interceptors.response.use(
     return response
   },
   (error) => {
-    if ( error?.status_code === 401) {
-        const router = useRouter();
-        router.push(PATH.LOGIN)
+    console.log(error?.response?.status);
+    if ( error?.response?.status === 401) {
+      removeAccessToken();
+      removeUserInfoFromCookie();
     }
     return {
       errorMessage: error?.message,

@@ -32,6 +32,16 @@ import {
   deleteDevice,
   updateDevice,
 } from "../../../services/apis/device";
+import {
+  addDeviceDatasource,
+  deleteDeviceDatasource,
+  getListDeviceAddDatasource,
+} from "../../../services/apis/organization";
+import {
+  createRule,
+  getListDevicesRule,
+  updateRule,
+} from "../../../services/apis/rule";
 
 export interface IAddDeviceModalProps {
   isOpen: boolean;
@@ -48,47 +58,59 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   data,
   refetch,
 }) => {
-  const [groupID, setGroupID] = useState(0);
   const router = useRouter();
-  const [groupSelected, setGroupSelected] = useState<any>({});
+  const [deviceIDSelected, setDeviceIDSelected] = useState(0);
+  const options = ["EQUAL", "NOT EQUAL", "GREATER THAN", "LESS THAN"];
+
+  const [value1, setValue1] = useState<string | null>(options[0]);
+  const [inputValue1, setInputValue1] = useState("");
+  const [value2, setValue2] = useState<string | null>(options[0]);
+  const [inputValue2, setInputValue2] = useState("");
+  const [value3, setValue3] = useState<string | null>(options[0]);
+  const [inputValue3, setInputValue3] = useState("");
 
   const formik = useFormik({
     initialValues: {
       device_id: 0,
-      profile_id: 0,
-      group_id: 0,
       name: "",
-      description: "",
-      topic: "",
-      state: "",
-      user_name: "",
-      password: "",
+      attribute: "",
+      comparison: "",
+      value: 0,
     },
     onSubmit: (values) => {
-      isEdit
-        ? onUpdate({
-            device_id: data.device_id,
-            profile_id: data.profile_id,
-            group_id: formik.values.group_id,
-            name: values.name,
-            description: values.description,
-            topic: values.topic,
-            state: values.state,
-            user_name: values.user_name,
-            password: values.password,
-          })
-        : onCreate({
-            device_id: 0,
-            profile_id: 0,
-            group_id: formik.values.group_id,
-            name: values.name,
-            description: values.description,
-            topic: values.topic,
-            state: values.state,
-            user_name: values.user_name,
-            password: values.password,
-          });
+      console.log("THIS IS THE RULES");
+      console.log(values);
+      // if (deviceIDSelected === 0) {
+      //   handleOnClose();
+      //   return;
+      // }
+      // handleAddDatasource(deviceIDSelected);
+      handleOnClose();
       refetch();
+      // isEdit
+      //   ? onUpdate({
+      //       device_id: data.device_id,
+      //       profile_id: data.profile_id,
+      //       group_id: formik.values.group_id,
+      //       name: values.name,
+      //       description: values.description,
+      //       topic: values.topic,
+      //       state: values.state,
+      //       user_name: values.user_name,
+      //       password: values.password,
+      //     })
+      //   : onCreate({
+      //       device_id: 0,
+      //       profile_id: 0,
+      //       group_id: formik.values.group_id,
+      //       name: values.name,
+      //       description: values.description,
+      //       topic: values.topic,
+      //       state: values.state,
+      //       user_name: values.user_name,
+      //       password: values.password,
+      //     });
+      // refetch();
     },
     validationSchema: Yup.object().shape({
       group_id: Yup.number()
@@ -106,38 +128,27 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     }),
   });
 
-  useEffect(() => {
-    if (isEdit) {
-      formik.setValues({
-        device_id: data.device_id,
-        profile_id: data.profile_id,
-        group_id: data.group_id,
-        name: data.name,
-        description: data.description,
-        topic: data.topic,
-        state: data.state,
-        user_name: data.user_name,
-        password: data.password,
-      });
-    } else {
-    }
-  }, []);
-
-  const handleOnDeleteGroup = (id: number) => {
-    const resp = deleteDevice(id).then((result) => console.log(result.data));
-  };
-
-  useEffect(() => {
-    formik.setValues({
-      ...formik.values,
-      ...data,
-    });
-  }, [data, isEdit]);
+  // useEffect(() => {
+  //   if (isEdit) {
+  //     formik.setValues({
+  //       device_id: data.device_id,
+  //       profile_id: data.profile_id,
+  //       group_id: data.group_id,
+  //       name: data.name,
+  //       description: data.description,
+  //       topic: data.topic,
+  //       state: data.state,
+  //       user_name: data.user_name,
+  //       password: data.password,
+  //     });
+  //   } else {
+  //   }
+  // }, []);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
     async (values: any) => {
       try {
-        const response: any = await createDevice(values);
+        const response: any = await createRule(values);
         if (response?.status !== 200) {
           toastOptions(
             "error",
@@ -161,36 +172,11 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
       }
     }
   );
-  const [filter, setFilter] = useState<FilterBase>({
-    page_size: PAGINATION.PAGE_SIZE,
-    page_index: PAGINATION.PAGE,
-    name: "",
-    sort: PAGINATION.SORT_ASC,
-  });
-
-  const {
-    data: dataGroupDevices,
-    isFetching,
-    refetch: refetchGroupDevices,
-  } = useQuery(
-    [`list-device-modal-device`],
-    async () => {
-      let response = await getListDevices({ filter });
-      // if result not null set to map
-      if (response.status == 200 && response.data.data.device_groups != null) {
-        return response;
-      }
-    },
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
 
   const { mutate: onUpdate, isLoading: loadingUpdate } = useMutation(
     async (values: any) => {
       try {
-        const response: any = await updateDevice(values);
+        const response: any = await updateRule(values);
         if (response?.status !== 200) {
           toastOptions(
             "error",
@@ -219,13 +205,12 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     }
   );
 
-  const handleChangeInput = () => {
-    refetchGroupDevices();
-  };
-
-  const haneldOnchangeAutoComplete = (event: any, data: any) => {
-    console.log(data);
-  };
+  const [filter, setFilter] = useState<FilterBase>({
+    page_size: PAGINATION.PAGE_SIZE,
+    page_index: PAGINATION.PAGE,
+    name: "",
+    sort: PAGINATION.SORT_ASC,
+  });
 
   const handleSetFilter = (name: string) => {
     setFilter({
@@ -234,6 +219,29 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
       name: name,
       sort: PAGINATION.SORT_ASC,
     });
+  };
+
+  const {
+    data: dataDevices,
+    isFetching,
+    refetch: refetchDevices,
+  } = useQuery(
+    [`list-device-devicess`],
+    async () => {
+      let response = await getListDevicesRule({ filter });
+      // if result not null set to map
+      if (response.status == 200 && response.data.data.devices != null) {
+        return response;
+      }
+    },
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const handleChangeInput = () => {
+    refetchDevices();
   };
 
   return (
@@ -251,139 +259,122 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     >
       {isEdit ? (
         <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
-          Update Device
+          Update Rule
         </Typography>
       ) : (
         <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
-          Create Device
+          Add Rule to Device
         </Typography>
       )}
       <form onSubmit={formik.handleSubmit}>
-        {isEdit ? (
-          <></>
-        ) : (
-          <>
-            <Autocomplete
-              disablePortal
-              fullWidth
-              id="combo-box-demo"
-              options={dataGroupDevices?.data?.data?.device_groups || []}
-              getOptionLabel={(option: any) => {
-                return option.name;
+        <Autocomplete
+          disablePortal
+          fullWidth
+          id="combo-box-demo"
+          options={dataDevices?.data?.data?.devices || []}
+          getOptionLabel={(option: any) => {
+            return option.name;
+          }}
+          onInputChange={(event, data) => {
+            handleSetFilter(data || "");
+          }}
+          onChange={(event, data) => {
+            setDeviceIDSelected(data?.device_id || 0);
+          }}
+          onKeyDown={(event) => {
+            // search when enter key is pressed
+            if (event.key === "Enter") {
+              handleChangeInput();
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              sx={{
+                m: "20px",
+                width: "95%",
               }}
-              onChange={(event, data) => {
-                setGroupSelected(data);
-                console.log(data);
-                formik.setFieldValue("group_id", data?.group_id || 0);
-              }}
-              onInputChange={(event, data) => {
-                handleSetFilter(data || "")
-              }}
-              onKeyDown={(event) => {
-                // search when enter key is pressed
-                if (event.key === "Enter") {
-                  handleChangeInput();
-                }
-              }}
-              onBlur={formik.handleBlur}
-              renderInput={(params) => (
-                <TextField
-                  sx={{
-                    m: "20px",
-                    width: "95%",
-                  }}
-                  error={Boolean(formik.errors.group_id)}
-                  helperText={formik.errors.group_id}
-                  type="text"
-                  label="Select Device Group - Type and press Enter to Search..."
-                  variant="filled"
-                  {...params}
-                />
-              )}
+              type="text"
+              label="Select Device To Add Rule - Type and press Enter to Search..."
+              variant="filled"
+              {...params}
             />
-          </>
-        )}
+          )}
+        />
         <TextField
           sx={{
             m: "20px",
             width: "95%",
           }}
-          error={Boolean(formik.errors.name)}
-          helperText={formik.errors.name}
           type="text"
+          fullWidth
           name="name"
+          size="small"
           value={formik.values.name}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          label="Device Name"
-          size="small"
           variant="filled"
+          label="Rule Name"
         />
-        <TextField
-          sx={{
-            m: "20px",
-            width: "95%",
-          }}
-          error={Boolean(formik.errors.description)}
-          helperText={formik.errors.description}
-          type="text"
-          name="description"
-          value={formik.values.description}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          label="Device Description"
-          size="small"
-          variant="filled"
-        />
-
-        <TextField
-          sx={{
-            m: "20px",
-            width: "95%",
-          }}
-          error={Boolean(formik.errors.topic)}
-          helperText={formik.errors.topic}
-          type="text"
-          name="topic"
-          value={formik.values.topic}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          label="Device Topic - For MQTT Only"
-          size="small"
-          variant="filled"
-        />
-        <TextField
-          sx={{
-            m: "20px",
-            width: "95%",
-          }}
-          error={Boolean(formik.errors.user_name)}
-          helperText={formik.errors.user_name}
-          type="text"
-          name="user_name"
-          value={formik.values.user_name}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          label="User Name To Connect This Device"
-          size="small"
-          variant="filled"
-        />
-        <TextField
-          sx={{
-            m: "20px",
-            width: "95%",
-          }}
-          error={Boolean(formik.errors.password)}
-          helperText={formik.errors.password}
-          type="text"
-          name="password"
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          label="Password To Connect This Device"
-          size="small"
-          variant="filled"
-        />
+        <Grid container spacing={"10px"} sx={{ mt: "10px" }}>
+          <Grid item>
+            <TextField
+              sx={{
+                m: "20px",
+              }}
+              type="number"
+              value={formik.values.attribute}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              name="attribute"
+              label="Attribute"
+              size="small"
+              variant="filled"
+            />
+          </Grid>
+          <Grid item>
+            <Autocomplete
+              sx={{
+                m: "20px",
+              }}
+              value={value1}
+              onChange={(event: any, newValue: string | null) => {
+                setValue1(newValue);
+              }}
+              inputValue={inputValue1}
+              onInputChange={(event, newInputValue) => {
+                setInputValue1(newInputValue);
+              }}
+              id="controllable-states-demo"
+              options={options}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  sx={{ width: "187px" }}
+                  type="text"
+                  name="rule1_comp"
+                  size="small"
+                  variant="filled"
+                  label="Select Coparision"
+                />
+              )}
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              sx={{
+                m: "20px",
+              }}
+              type="number"
+              name="value"
+              value={formik.values.value}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              label="Rule Value"
+              size="small"
+              variant="filled"
+            />
+          </Grid>
+        </Grid>
         <Box
           textAlign={"right"}
           sx={{
@@ -406,12 +397,12 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
                 "&:hover": { backgroundColor: "#ec7211" },
               }}
               onClick={() => {
-                handleOnDeleteGroup(formik.values.device_id);
+                // handleOnDeleteDeviceDatasource(data?.device_id);
                 handleOnClose();
                 refetch();
               }}
             >
-              DELETE
+              Confirm
             </Button>
           ) : (
             <></>
@@ -428,6 +419,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             }}
             onClick={() => {
               handleOnClose();
+              refetch();
             }}
           >
             CANCEL

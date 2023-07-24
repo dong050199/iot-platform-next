@@ -19,158 +19,204 @@ import { useLocation } from "react-router-dom";
 import { getGoogleUrl } from "../../utils/getGoogleUrl";
 import { Alert, Paper, Snackbar } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { setUserInfo } from "../../redux/actions/user";
 import { userInfo } from "os";
-import { useQuery } from "react-query";
-import { getAccessToken } from "../../utils/cookies";
+import { useMutation, useQuery } from "react-query";
+import {
+  getAccessToken,
+  removeAccessToken,
+  removeUserInfoFromCookie,
+  setAccessToken,
+  setUserInfoToCookie,
+} from "../../utils/cookies";
 import { AxiosResponse } from "axios";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { loginUser } from "../../services/authentication/authenticationService";
+import { ALERT_TYPE } from "../signup";
+import { getUserInfo } from "../../services/apis/users";
 
-const loginSchema = object({
-  email: string()
-    .min(1, "Email address is required")
-    .email("Email Address is invalid"),
-  password: string()
-    .min(1, "Password is required")
-    .min(8, "Password must be more than 8 characters")
-    .max(32, "Password must be less than 32 characters"),
-});
-
-export type LoginInput = TypeOf<typeof loginSchema>;
+interface IUserLogin {
+  email: string;
+  password: string;
+}
 
 const Login: NextPage = () => {
-  const methods = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-  });
-  const accessToken = getAccessToken();
-
-  const router = useRouter();
-
   const [openSnackBar, setOpenSnackBar] = useState(false);
-
   const handleCloseSnackBar = () => {
     setOpenSnackBar(false);
   };
+  const [alertType, setAlertType] = useState(ALERT_TYPE.WARNING);
+  const [content, setContent] = useState("");
+  const accessToken = getAccessToken();
+  const router = useRouter();
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    onSubmit: (valuse) => {
+      onApply(valuse)
+    },
+    validationSchema: Yup.object().shape({
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Please enter your email address"),
+      password: Yup.string()
+        .required("Password is required")
+        .min(8, "Password must be at least 8 characters"),
+    }),
+  });
+
   const { message } = router.query;
   useEffect(() => {
     if (accessToken) {
       router.push("/home");
     }
-    if (message === "invalid") {
-      setOpenSnackBar(true);
+    if (message) {
+      setOpenSnackBar(true)
+      setContent(message as string)
     }
   }, [message]);
 
-  const {
-    reset,
-    handleSubmit,
-    formState: { isSubmitSuccessful },
-  } = methods;
-
-  const from = router.pathname || "/";
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset();
+  const { mutate: onApply, isLoading: loadingUpdate } = useMutation(
+    async (values: any) => {
+      try {
+        console.log(values);
+        const response: any = await loginUser(values);
+        if (response?.status !== 200) {
+          setAlertType(ALERT_TYPE.ERROR);
+          setOpenSnackBar(true);
+          setContent(response?.errorMessage);
+          return false;
+        } else {
+          setAccessToken(response?.data?.data);
+          //set access token to cookie
+          setAlertType(ALERT_TYPE.SUCCESS);
+          setOpenSnackBar(true);
+          setContent("Login successfully");
+          // open snack bar for notification
+          const useInfoResponse: any = await getUserInfo();
+          if (useInfoResponse.status !== 200) {
+            setAlertType(ALERT_TYPE.ERROR);
+            setOpenSnackBar(true);
+            setContent("Register failed");
+            return false;
+          } else {
+            setAlertType(ALERT_TYPE.SUCCESS);
+            setOpenSnackBar(true);
+            setContent("Register successfully");
+            // get user info and set to cookies
+            setUserInfoToCookie({
+              email: useInfoResponse?.data?.data?.email,
+              name: useInfoResponse?.data?.data?.full_name,
+            });
+            router.push("/home");
+            return true;
+          }
+        }
+      } catch (error: any) {
+        setAlertType(ALERT_TYPE.ERROR);
+        setOpenSnackBar(true);
+        setContent(error?.errorMessage);
+        return false;
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const onSubmitHandler: SubmitHandler<LoginInput> = (values) => {
-    // 👇 Executing the loginUser Mutation
-  };
+  );
 
   return (
-    <Container
-      className="login-container"
-      component="main"
-      maxWidth="sm"
-    >
+    <Container className="login-container" component="main" maxWidth="sm">
       <Paper>
-      <Box
-        sx={{
-          boxShadow: 3,
-          borderRadius: 2,
-          px: 4,
-          py: 6,
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography component="h1" variant="h3">
-          Sign In
-        </Typography>
         <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmitHandler)}
-          noValidate
-          sx={{ mt: 1 }}
+          sx={{
+            boxShadow: 3,
+            borderRadius: 2,
+            px: 4,
+            py: 6,
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
-          >
+          <Typography component="h1" variant="h3">
             Sign In
-          </Button>
-          <Button
-            startIcon={<GoogleIcon />}
-            href={getGoogleUrl(from)}
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
-          >
-            Login with Google
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link
-                href="#"
-                variant="body2"
-                onClick={() => {
-                  router.push("/signup");
-                }}
+          </Typography>
+          <form onSubmit={formik.handleSubmit}>
+            <Box sx={{ mt: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                error={Boolean(formik.errors.email)}
+                helperText={formik.errors.email as string}
+                type="text"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                error={Boolean(formik.errors.password)}
+                helperText={formik.errors.password as string}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              <FormControlLabel
+                control={<Checkbox value="remember" color="primary" />}
+                label="Remember me"
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
               >
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
+                Sign In
+              </Button>
+              <Button
+                startIcon={<GoogleIcon />}
+                href={getGoogleUrl("")}
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
+              >
+                Login with Google
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link
+                    href="#"
+                    variant="body2"
+                    onClick={() => {
+                      router.push("/signup");
+                    }}
+                  >
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
+              </Grid>
+            </Box>
+          </form>
         </Box>
-      </Box>
       </Paper>
-      
+
       <Snackbar
         open={openSnackBar}
         autoHideDuration={6000}
@@ -181,7 +227,7 @@ const Login: NextPage = () => {
           severity="info"
           sx={{ width: "100%" }}
         >
-          You must loggin to see all contents!
+          {content}
         </Alert>
       </Snackbar>
     </Container>

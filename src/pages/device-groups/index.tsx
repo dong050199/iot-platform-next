@@ -32,9 +32,11 @@ import { PAGINATION } from "../../constants/pagination";
 import { capitalize, clone, mergeWith, pick } from "lodash";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { getListDevices } from "../../services/apis/iot-api";
+import { getListDevices } from "../../services/apis/deviceGroup";
+import { getUserInfoFromCookie } from "../../utils/cookies";
+import Login from "../login";
 
-interface FilterBase {
+export interface FilterBase {
   page_size?: number;
   page_index?: number;
   name?: string;
@@ -46,15 +48,23 @@ interface FilterBase {
 
 const DeviceGroup: NextPage = () => {
   const router = useRouter();
+  const { email, name } = getUserInfoFromCookie();
+  useEffect(() => {
+    if (!!!email) {
+      router.push("/login?message=You must login to access this resource.");
+    }
+  });
+
   const [modalState, setModalState] = useState<IAddDeviceGroupModalProps>({
     isOpen: false,
     isEdit: false,
     data: {},
   });
+
   const [filter, setFilter] = useState<FilterBase>({
     page_size: PAGINATION.PAGE_SIZE,
     page_index: PAGINATION.PAGE,
-    name: '',
+    name: "",
     id_includes: [],
     from_date: 0,
     to_date: 0,
@@ -125,7 +135,7 @@ const DeviceGroup: NextPage = () => {
     async () => getListDevices({ filter }),
     {
       keepPreviousData: true,
-      refetchOnWindowFocus:false,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -221,14 +231,14 @@ const DeviceGroup: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Rule Campaign | Yes4All</title>
+        <title>Device Group | Uraa</title>
       </Head>
       <Container maxWidth={false}>
         <Skeleton isLoading={false}>
           <Box sx={{ pt: "18px", ml: "0px", mb: 3 }}>
             <MuiTable
               columns={columns}
-              data={data?.data?.data?.device_groups}
+              data={data?.data?.data?.device_groups || []}
               loading={isFetching}
               getRowId={(row: any) => row.awsCampaignID}
               pagination={{

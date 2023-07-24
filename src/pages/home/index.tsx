@@ -6,9 +6,11 @@ import Head from "next/head";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { AppBar, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { PersistentDrawerLeftComponent } from "../../components/appBar/appBar";
 import Footer from "../../components/landingPage/footer";
+import { getUserInfoFromCookie } from "../../utils/cookies";
+import { useDispatch } from "react-redux";
 
 const Home: NextPage = () => {
   const ourSolutions = [

@@ -16,7 +16,7 @@ import {
   createDeviceGroup,
   deleteDeviceGroup,
   updateDeviceGroup,
-} from "../../../services/apis/iot-api";
+} from "../../../services/apis/deviceGroup";
 import { toastOptions } from "../../../utils/toast.options";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
@@ -39,7 +39,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
   data,
   refetch,
 }) => {
-  console.log(data);
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
@@ -51,8 +50,8 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
       latitude: 0,
       longtitude: 0,
     },
+    
     onSubmit: (values) => {
-      console.log(values);
       isEdit
         ? onUpdate({
             group_id: data.group_id,
