@@ -11,31 +11,48 @@ import { PersistentDrawerLeftComponent } from "../../components/appBar/appBar";
 import Footer from "../../components/landingPage/footer";
 import { getUserInfoFromCookie } from "../../utils/cookies";
 import { useDispatch } from "react-redux";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+
+  const router = useRouter();
+
+
   const ourSolutions = [
     {
-      title: "Resfull For All Data",
+      title: "MQTT Connections",
       content:
-        "this is the content of the homepage,this is the content of the homepage,this is the content of the homepage",
+        "Easy to connect and manager yout IoT devices. Secure MQTT connection with unique username and password. Support TLS with privare and public keys.",
       button: "Visit here",
     },
     {
-      title: "Devices Management",
+      title: "Restfull API",
       content:
-        "this is the content of the homepage,this is the content of the homepage,this is the content of the homepage",
+        "Monitor your services with restAPI integration with IoT devices. Connect easily and secure with JWT access token or basic authentication",
       button: "Visit here",
     },
     {
-      title: "Group Management",
+      title: "Grafana Management",
       content:
-        "this is the content of the homepage,this is the content of the homepage,this is the content of the homepage",
+        "Configuration spaces for any user. Automatically add datasource with open websocket connection. Easy to create dashboard and monitor your IoT services.",
       button: "Visit here",
     },
     {
-      title: "MQTT Plugin",
+      title: "Rule and Filter",
       content:
-        "this is the content of the homepage,this is the content of the homepage,this is the content of the homepage",
+        "Configuration your messages before sending to another network. Easy to add rules and filters for your IoT data. Easy to making automatic messaging",
+      button: "Visit here",
+    },
+    {
+      title: "Stream Processing Plugin",
+      content:
+        "Support kafka to stream your data. View streaming data on dashboard by websocket connection.",
+      button: "Visit here",
+    },
+    {
+      title: "Batch Processing Plugin",
+      content:
+        "Support batch processing with high performance of Spark data processing.",
       button: "Visit here",
     },
   ];
@@ -65,7 +82,7 @@ const Home: NextPage = () => {
                 variant="h3"
                 color={"white"}
               >
-                The Powerfull IoT Platform for Software Developers
+                IoT Platform With Stream and Batch Data Processing
               </Typography>
             </Grid>
 
@@ -86,6 +103,9 @@ const Home: NextPage = () => {
                   backgroundColor: "#ec7211",
                   mt: "5%",
                   "&:hover": { backgroundColor: "#ec7211" },
+                }}
+                onClick={() => {
+                  router.push("/device-groups")
                 }}
                 style={{ textTransform: "none" }}
               >
@@ -199,9 +219,7 @@ const Home: NextPage = () => {
 };
 
 Home.getLayout = (page: any) => (
-  <PersistentDrawerLeftComponent >
-    {page}
-  </PersistentDrawerLeftComponent>
+  <PersistentDrawerLeftComponent>{page}</PersistentDrawerLeftComponent>
 );
 
 export default Home;

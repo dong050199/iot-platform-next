@@ -23,7 +23,10 @@ import { SeverityPill } from "../../components/severity-pill";
 import Head from "next/head";
 import { Skeleton } from "../../components/skeleton";
 import { MuiTable } from "../../components/mui-table";
-import AddDeviceGroupModal, { IAddDeviceModalProps } from "./container/modal";
+import AddDeviceGroupModal, {
+  AddRuleModal,
+  IAddRuleModalProps,
+} from "./container/modal";
 import { useQuery } from "react-query";
 import { getPagination } from "../../utils/pagination";
 import { PAGINATION } from "../../constants/pagination";
@@ -42,7 +45,7 @@ import {
 import LoginIcon from "@mui/icons-material/Login";
 import { getListRule } from "../../services/apis/rule";
 
-const Dashboard: NextPage = () => {
+const Rules: NextPage = () => {
   const router = useRouter();
   const { email, name } = getUserInfoFromCookie();
   useEffect(() => {
@@ -51,9 +54,7 @@ const Dashboard: NextPage = () => {
     }
   });
 
-  const [showLoginInfo, setShowLoginInfo] = useState(false);
-
-  const [modalState, setModalState] = useState<IAddDeviceModalProps>({
+  const [modalState, setModalState] = useState<IAddRuleModalProps>({
     isOpen: false,
     isEdit: false,
     data: {},
@@ -170,6 +171,7 @@ const Dashboard: NextPage = () => {
             <Button
               style={{ textTransform: "none" }}
               onClick={() => {
+                console.log(row.original);
                 setModalState({
                   isEdit: true,
                   isOpen: true,
@@ -313,83 +315,6 @@ const Dashboard: NextPage = () => {
         </Grid>
       </Box>
       <Container maxWidth={false}>
-        {showLoginInfo ? (
-          <Paper
-            sx={{
-              height: "50px",
-              width: "100%",
-              mt: "10px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Grid container alignItems={"right"} justifyContent={"right"}>
-              <Grid item>
-                <Typography sx={{ fontSize: "17px", m: 3 }}>
-                  Your email
-                </Typography>
-              </Grid>
-              <Grid item>
-                <TextField
-                  type={typeView}
-                  size="small"
-                  sx={{ m: 3 }}
-                  variant="standard"
-                  // value={dataOrs?.data?.data?.user_name}
-                />
-              </Grid>
-              <Grid item>
-                <Typography sx={{ fontSize: "17px", m: 3 }}>
-                  Password
-                </Typography>
-              </Grid>
-              <Grid item>
-                <TextField
-                  type={typeView}
-                  size="small"
-                  sx={{ m: 3 }}
-                  variant="standard"
-                  // value={dataOrs?.data?.data?.password}
-                />
-              </Grid>
-              <Grid item sx={{ left: 0 }}>
-                {typeView == "password" ? (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    onClick={handleViewUserPass}
-                    sx={{
-                      m: 3,
-                      left: "0",
-                      backgroundColor: "#ec7211",
-                      "&:hover": { backgroundColor: "#ec7211" },
-                    }}
-                  >
-                    View
-                  </Button>
-                ) : (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    onClick={handleHideUserPass}
-                    sx={{
-                      m: 3,
-                      left: "0",
-                      backgroundColor: "#ec7211",
-                      "&:hover": { backgroundColor: "#ec7211" },
-                    }}
-                  >
-                    Hide
-                  </Button>
-                )}
-              </Grid>
-            </Grid>
-          </Paper>
-        ) : (
-          <></>
-        )}
-
         <Skeleton isLoading={false}>
           <Box sx={{ pt: "10px", ml: "0px", mb: 3 }}>
             <MuiTable
@@ -503,7 +428,7 @@ const Dashboard: NextPage = () => {
             />
           </Box>
         </Skeleton>
-        <AddDeviceGroupModal
+        <AddRuleModal
           isEdit={modalState.isEdit}
           data={modalState.data}
           isOpen={modalState.isOpen}
@@ -515,8 +440,8 @@ const Dashboard: NextPage = () => {
   );
 };
 
-Dashboard.getLayout = (page: any) => (
+Rules.getLayout = (page: any) => (
   <PersistentDrawerLeftComponent>{page}</PersistentDrawerLeftComponent>
 );
 
-export default Dashboard;
+export default Rules;

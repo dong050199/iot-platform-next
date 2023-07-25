@@ -41,25 +41,25 @@ const Rules: NextPage = () => {
     {
       title: "Number Device Created",
       content: 1,
-      button: "Visit here",
+      button: "Visit Device",
       path: "/devices",
     },
     {
       title: "Grafana Datasource",
       content: 10,
-      button: "Visit here",
+      button: "Visit Dashboard",
       path: "/dashboard",
     },
     {
       title: "Group Devices",
       content: 11,
-      button: "Visit here",
+      button: "Visit Group Devices",
       path: "/device-groups",
     },
     {
       title: "Rule Created",
       content: 12,
-      button: "Visit here",
+      button: "Visit Rule",
       path: "/rules",
     },
   ];

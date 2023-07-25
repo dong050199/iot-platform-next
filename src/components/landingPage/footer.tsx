@@ -25,7 +25,7 @@ export default function Footer() {
               About Us
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              We are XYZ company, dedicated to providing the best service to our
+              We are DEF Team , dedicated to providing the best service to our
               customers.
             </Typography>
           </Grid>
@@ -34,13 +34,13 @@ export default function Footer() {
               Contact Us
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              123 Main Street, Anytown, USA
+              123 Tran Trong Cung Street, Distric 7, HCMC, VN
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Email: info@example.com
+              Email: dong01667181618@gmail.com
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Phone: +1 234 567 8901
+              Phone: +84 367181618
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>

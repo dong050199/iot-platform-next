@@ -39,11 +39,12 @@ import {
 } from "../../../services/apis/organization";
 import {
   createRule,
+  deleteRule,
   getListDevicesRule,
   updateRule,
 } from "../../../services/apis/rule";
 
-export interface IAddDeviceModalProps {
+export interface IAddRuleModalProps {
   isOpen: boolean;
   handleOnClose?: any;
   isEdit: boolean;
@@ -51,7 +52,7 @@ export interface IAddDeviceModalProps {
   refetch?: any;
 }
 
-export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
+export const AddRuleModal: FC<IAddRuleModalProps> = ({
   isOpen,
   handleOnClose,
   isEdit,
@@ -64,86 +65,65 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
 
   const [value1, setValue1] = useState<string | null>(options[0]);
   const [inputValue1, setInputValue1] = useState("");
-  const [value2, setValue2] = useState<string | null>(options[0]);
-  const [inputValue2, setInputValue2] = useState("");
-  const [value3, setValue3] = useState<string | null>(options[0]);
-  const [inputValue3, setInputValue3] = useState("");
 
   const formik = useFormik({
     initialValues: {
       device_id: 0,
+      rule_id: 0,
       name: "",
       attribute: "",
       comparison: "",
-      value: 0,
+      rule_value: 0,
     },
     onSubmit: (values) => {
-      console.log("THIS IS THE RULES");
       console.log(values);
-      // if (deviceIDSelected === 0) {
-      //   handleOnClose();
-      //   return;
-      // }
-      // handleAddDatasource(deviceIDSelected);
+      isEdit
+        ? onUpdate({
+            rule_id: data.rule_id,
+            device_id: formik.values.device_id,
+            name: values.name,
+            attribute: values.attribute,
+            comparison: values.comparison,
+            rule_value: values.rule_value,
+          })
+        : onCreate({
+            rule_id: 0,
+            device_id: formik.values.device_id,
+            name: values.name,
+            attribute: values.attribute,
+            comparison: values.comparison,
+            rule_value: values.rule_value,
+          });
       handleOnClose();
       refetch();
-      // isEdit
-      //   ? onUpdate({
-      //       device_id: data.device_id,
-      //       profile_id: data.profile_id,
-      //       group_id: formik.values.group_id,
-      //       name: values.name,
-      //       description: values.description,
-      //       topic: values.topic,
-      //       state: values.state,
-      //       user_name: values.user_name,
-      //       password: values.password,
-      //     })
-      //   : onCreate({
-      //       device_id: 0,
-      //       profile_id: 0,
-      //       group_id: formik.values.group_id,
-      //       name: values.name,
-      //       description: values.description,
-      //       topic: values.topic,
-      //       state: values.state,
-      //       user_name: values.user_name,
-      //       password: values.password,
-      //     });
-      // refetch();
     },
     validationSchema: Yup.object().shape({
-      group_id: Yup.number()
-        .min(1, "Please select valid group")
-        .required("Please select group of devices"),
+      // device_id: Yup.number()
+      //   .min(1, "Please select valid device")
+      //   .required("Please select device to add rule"),
       name: Yup.string().required("Name is required"),
-      description: Yup.string().required("Description is required"),
-      topic: Yup.string().required("Please create topic for this device"),
-      user_name: Yup.string()
-        .required("User name is require for device")
-        .min(8, "User name must be at least 8 characters"),
-      password: Yup.string()
-        .min(8, "Password must be at least 8 characters")
-        .required("Please enter the password for this device"),
+      attribute: Yup.string().required("Atribute is required"),
+      comparison: Yup.string().required("Please slect valid comparision"),
+      rule_value: Yup.number()
+        .required("Rule value is require")
+        .min(0, "Value must be negative"),
     }),
   });
 
-  // useEffect(() => {
-  //   if (isEdit) {
-  //     formik.setValues({
-  //       device_id: data.device_id,
-  //       profile_id: data.profile_id,
-  //       group_id: data.group_id,
-  //       name: data.name,
-  //       description: data.description,
-  //       topic: data.topic,
-  //       state: data.state,
-  //       user_name: data.user_name,
-  //       password: data.password,
-  //     });
-  //   } else {
-  //   }
-  // }, []);
+  useEffect(() => {
+    console.log(data);
+    if (isEdit) {
+      formik.setValues({
+        rule_id: data.rule_id,
+        device_id: data.device_id,
+        name: data.name,
+        attribute: data.attribute,
+        comparison: data.comparison,
+        rule_value: data.rule_value,
+      });
+    } else {
+    }
+  }, []);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
     async (values: any) => {
@@ -226,7 +206,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     isFetching,
     refetch: refetchDevices,
   } = useQuery(
-    [`list-device-devicess`],
+    [`list-device-rules`],
     async () => {
       let response = await getListDevicesRule({ filter });
       // if result not null set to map
@@ -240,66 +220,80 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     }
   );
 
+  const handleDeleteRule = (id: number) => {
+    const resp = deleteRule(id).then((result) => console.log(result.data));
+  };
+
   const handleChangeInput = () => {
     refetchDevices();
   };
 
+  console.log(formik)
+
   return (
-    <Modal
-      open={isOpen}
-      onClose={handleOnClose}
-      sx={{
-        minWidth: 700,
-        width: "auto",
-        flexDirection: "column",
-        position: "relative",
-        maxWidth: "800px",
-        maxHeight: "95vh",
-      }}
-    >
-      {isEdit ? (
-        <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
-          Update Rule
-        </Typography>
-      ) : (
-        <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
-          Add Rule to Device
-        </Typography>
-      )}
-      <form onSubmit={formik.handleSubmit}>
-        <Autocomplete
-          disablePortal
-          fullWidth
-          id="combo-box-demo"
-          options={dataDevices?.data?.data?.devices || []}
-          getOptionLabel={(option: any) => {
-            return option.name;
-          }}
-          onInputChange={(event, data) => {
-            handleSetFilter(data || "");
-          }}
-          onChange={(event, data) => {
-            setDeviceIDSelected(data?.device_id || 0);
-          }}
-          onKeyDown={(event) => {
-            // search when enter key is pressed
-            if (event.key === "Enter") {
-              handleChangeInput();
-            }
-          }}
-          renderInput={(params) => (
-            <TextField
-              sx={{
-                m: "20px",
-                width: "95%",
-              }}
-              type="text"
-              label="Select Device To Add Rule - Type and press Enter to Search..."
-              variant="filled"
-              {...params}
-            />
-          )}
-        />
+    <form onSubmit={formik.handleSubmit}>
+      <Modal
+        open={isOpen}
+        onClose={handleOnClose}
+        sx={{
+          minWidth: 700,
+          width: "auto",
+          flexDirection: "column",
+          position: "relative",
+          maxWidth: "800px",
+          maxHeight: "95vh",
+        }}
+      >
+        {isEdit ? (
+          <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
+            Update Rule
+          </Typography>
+        ) : (
+          <Typography variant="h5" sx={{ ml: "18px", fontWeight: "bold" }}>
+            Add Rule to Device
+          </Typography>
+        )}
+        {isEdit ? (
+          <></>
+        ) : (
+          <Autocomplete
+            disablePortal
+            fullWidth
+            id="combo-box-demo"
+            options={dataDevices?.data?.data?.devices || []}
+            getOptionLabel={(option: any) => {
+              return option.name;
+            }}
+            onInputChange={(event, data) => {
+              handleSetFilter(data || "");
+            }}
+            onChange={(event, data) => {
+              console.log("DATA", data);
+              formik.setFieldValue("device_id", data?.device_id || 0);
+            }}
+            onKeyDown={(event) => {
+              // search when enter key is pressed
+              if (event.key === "Enter") {
+                handleChangeInput();
+              }
+            }}
+            renderInput={(params) => (
+              <TextField
+                sx={{
+                  m: "20px",
+                  width: "95%",
+                }}
+                error={Boolean(formik.errors.device_id)}
+                helperText={formik.errors.device_id}
+                type="text"
+                label="Select Device To Add Rule - Type and press Enter to Search..."
+                variant="filled"
+                {...params}
+              />
+            )}
+          />
+        )}
+
         <TextField
           sx={{
             m: "20px",
@@ -312,6 +306,8 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
           value={formik.values.name}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
+          error={Boolean(formik.errors.name)}
+          helperText={formik.errors.name}
           variant="filled"
           label="Rule Name"
         />
@@ -321,10 +317,12 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
               sx={{
                 m: "20px",
               }}
-              type="number"
+              type="text"
               value={formik.values.attribute}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              error={Boolean(formik.errors.attribute)}
+              helperText={formik.errors.attribute}
               name="attribute"
               label="Attribute"
               size="small"
@@ -339,19 +337,24 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
               value={value1}
               onChange={(event: any, newValue: string | null) => {
                 setValue1(newValue);
+                // formik.setFieldValue("comparision", newValue || "");
               }}
               inputValue={inputValue1}
               onInputChange={(event, newInputValue) => {
-                setInputValue1(newInputValue);
+                if(event) {
+                  formik.setFieldValue("comparison", newInputValue || "");
+                  setInputValue1(newInputValue);
+                }
               }}
               id="controllable-states-demo"
               options={options}
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  error={Boolean(formik.errors.comparison)}
+                  helperText={formik.errors.comparison}
                   sx={{ width: "187px" }}
                   type="text"
-                  name="rule1_comp"
                   size="small"
                   variant="filled"
                   label="Select Coparision"
@@ -365,8 +368,10 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
                 m: "20px",
               }}
               type="number"
-              name="value"
-              value={formik.values.value}
+              name="rule_value"
+              error={Boolean(formik.errors.rule_value)}
+              helperText={formik.errors.rule_value}
+              value={formik.values.rule_value}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               label="Rule Value"
@@ -397,12 +402,12 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
                 "&:hover": { backgroundColor: "#ec7211" },
               }}
               onClick={() => {
-                // handleOnDeleteDeviceDatasource(data?.device_id);
+                handleDeleteRule(data?.rule_id);
                 handleOnClose();
                 refetch();
               }}
             >
-              Confirm
+              Delete
             </Button>
           ) : (
             <></>
@@ -419,7 +424,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             }}
             onClick={() => {
               handleOnClose();
-              refetch();
             }}
           >
             CANCEL
@@ -429,6 +433,9 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             color="inherit"
             size="large"
             type="submit"
+            onClick={() =>{
+              formik.submitForm();
+            }}
             sx={{
               ml: "10px",
               border: "Highlight",
@@ -439,9 +446,9 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             SAVE
           </Button>
         </Box>
-      </form>
-    </Modal>
+      </Modal>
+    </form>
   );
 };
 
-export default AddDeviceGroupModal;
+export default AddRuleModal;

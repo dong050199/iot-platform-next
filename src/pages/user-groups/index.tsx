@@ -34,18 +34,80 @@ import { getUserInfoFromCookie } from "../../utils/cookies";
 import Login from "../login";
 import { FilterBase } from "../device-groups";
 import { getListDevice } from "../../services/apis/device";
+import {
+  createUserOrgs,
+  getListDeviceDataSource,
+} from "../../services/apis/organization";
+import LoginIcon from "@mui/icons-material/Login";
+import { getListRule } from "../../services/apis/rule";
 
-const UserGroup: NextPage = () => {
-
+const Rules: NextPage = () => {
   return (
     <>
-     <h1>Developing</h1>
+      <Head>
+        <title>Dashboard | Uraa</title>
+      </Head>
+      <Box
+        sx={{
+          height: "170px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#2e3b55",
+          width: "100%",
+        }}
+      >
+        <Grid>
+          <Grid item>
+            <Typography
+              fontWeight={"bold"}
+              sx={{
+                color: "white",
+                fontSize: "30px",
+                m: 1,
+              }}
+            >
+              Working with Your Team - This Feature will Release Soon
+            </Typography>
+          </Grid>
+          <Grid
+            item
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              size="large"
+              variant="contained"
+              sx={{
+                borderRadius: "30px",
+                color: "white",
+                border: "Highlight",
+                backgroundColor: "#ec7211",
+                "&:hover": { backgroundColor: "#ec7211" },
+              }}
+              href="http://localhost:3001"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Turn Back Home
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+      <Container maxWidth={false}>
+        <Skeleton isLoading={false}>
+          <Box sx={{ pt: "10px", ml: "0px", mb: 3 }}></Box>
+        </Skeleton>
+      </Container>
     </>
   );
 };
 
-UserGroup.getLayout = (page: any) => (
+Rules.getLayout = (page: any) => (
   <PersistentDrawerLeftComponent>{page}</PersistentDrawerLeftComponent>
 );
 
-export default UserGroup;
+export default Rules;
