@@ -76,7 +76,6 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
       rule_value: 0,
     },
     onSubmit: (values) => {
-      console.log(values);
       isEdit
         ? onUpdate({
             rule_id: data.rule_id,
@@ -111,7 +110,6 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
   });
 
   useEffect(() => {
-    console.log(data);
     if (isEdit) {
       formik.setValues({
         rule_id: data.rule_id,
@@ -221,14 +219,14 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
   );
 
   const handleDeleteRule = (id: number) => {
-    const resp = deleteRule(id).then((result) => console.log(result.data));
+    const resp = deleteRule(id).then((result) =>{
+      console.log(result.data)
+    });
   };
 
   const handleChangeInput = () => {
     refetchDevices();
   };
-
-  console.log(formik)
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -268,7 +266,6 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
               handleSetFilter(data || "");
             }}
             onChange={(event, data) => {
-              console.log("DATA", data);
               formik.setFieldValue("device_id", data?.device_id || 0);
             }}
             onKeyDown={(event) => {

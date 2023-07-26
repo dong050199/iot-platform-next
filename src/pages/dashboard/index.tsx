@@ -40,6 +40,8 @@ import {
   getListDeviceDataSource,
 } from "../../services/apis/organization";
 import LoginIcon from "@mui/icons-material/Login";
+import UserModal from "./container/userInfoModal";
+import { Password } from "@mui/icons-material";
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
@@ -101,16 +103,6 @@ const Dashboard: NextPage = () => {
     });
   };
 
-  const [typeView, setTypeView] = useState("password");
-
-  const handleViewUserPass = () => {
-    setTypeView("text");
-  };
-
-  const handleHideUserPass = () => {
-    setTypeView("password");
-  };
-
   const mergeParams = mergeWith(
     {
       page_index: PAGINATION.PAGE_SIZE,
@@ -160,7 +152,7 @@ const Dashboard: NextPage = () => {
       {
         header: "Device ID",
         accessorKey: "device_id",
-        size: 70,
+        size: 120,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => (
           <>
@@ -217,8 +209,8 @@ const Dashboard: NextPage = () => {
         },
       },
       {
-        header: "Status",
-        accessorKey: "status",
+        header: "State",
+        accessorKey: "state",
         size: 200,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {
@@ -264,6 +256,11 @@ const Dashboard: NextPage = () => {
       handleOnSearch(values);
     },
   });
+
+  const [openUserInfo, setOpenUserInfo] = useState(false);
+  const handleCloseUserInfo = () => {
+    setOpenUserInfo(false);
+  };
 
   return (
     <>
@@ -321,83 +318,6 @@ const Dashboard: NextPage = () => {
         </Grid>
       </Box>
       <Container maxWidth={false}>
-        {showLoginInfo ? (
-          <Paper
-            sx={{
-              height: "50px",
-              width: "100%",
-              mt: "10px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Grid container alignItems={"right"} justifyContent={"right"}>
-              <Grid item>
-                <Typography sx={{ fontSize: "17px", m: 3 }}>
-                  Your email
-                </Typography>
-              </Grid>
-              <Grid item>
-                <TextField
-                  type={typeView}
-                  size="small"
-                  sx={{ m: 3 }}
-                  variant="standard"
-                  value={dataOrs?.data?.data?.user_name}
-                />
-              </Grid>
-              <Grid item>
-                <Typography sx={{ fontSize: "17px", m: 3 }}>
-                  Password
-                </Typography>
-              </Grid>
-              <Grid item>
-                <TextField
-                  type={typeView}
-                  size="small"
-                  sx={{ m: 3 }}
-                  variant="standard"
-                  value={dataOrs?.data?.data?.password}
-                />
-              </Grid>
-              <Grid item sx={{ left: 0 }}>
-                {typeView == "password" ? (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    onClick={handleViewUserPass}
-                    sx={{
-                      m: 3,
-                      left: "0",
-                      backgroundColor: "#ec7211",
-                      "&:hover": { backgroundColor: "#ec7211" },
-                    }}
-                  >
-                    View
-                  </Button>
-                ) : (
-                  <Button
-                    size="medium"
-                    variant="contained"
-                    onClick={handleHideUserPass}
-                    sx={{
-                      m: 3,
-                      left: "0",
-                      backgroundColor: "#ec7211",
-                      "&:hover": { backgroundColor: "#ec7211" },
-                    }}
-                  >
-                    Hide
-                  </Button>
-                )}
-              </Grid>
-            </Grid>
-          </Paper>
-        ) : (
-          <></>
-        )}
-
         <Skeleton isLoading={false}>
           <Box sx={{ pt: "10px", ml: "0px", mb: 3 }}>
             <MuiTable
@@ -462,35 +382,20 @@ const Dashboard: NextPage = () => {
                         </Button>
                       </Grid>
                       <Grid item>
-                        {showLoginInfo ? (
-                          <Button
-                            size="medium"
-                            variant="contained"
-                            onClick={() => {
-                              setShowLoginInfo(false);
-                            }}
-                            sx={{
-                              backgroundColor: "#ec7211",
-                              "&:hover": { backgroundColor: "#ec7211" },
-                            }}
-                          >
-                            Hide Dashboard Login Info
-                          </Button>
-                        ) : (
-                          <Button
-                            size="medium"
-                            variant="contained"
-                            onClick={() => {
-                              setShowLoginInfo(true);
-                            }}
-                            sx={{
-                              backgroundColor: "#ec7211",
-                              "&:hover": { backgroundColor: "#ec7211" },
-                            }}
-                          >
-                            View Dashboard Login Info
-                          </Button>
-                        )}
+                        <Button
+                          size="medium"
+                          variant="contained"
+                          onClick={() => {
+                            setShowLoginInfo(true);
+                            setOpenUserInfo(true);
+                          }}
+                          sx={{
+                            backgroundColor: "#ec7211",
+                            "&:hover": { backgroundColor: "#ec7211" },
+                          }}
+                        >
+                          View Dashboard Login Info
+                        </Button>
                       </Grid>
                       <Grid sx={{ ml: "65%", position: "absolute" }} item>
                         <form onSubmit={formik.handleSubmit}>
@@ -548,6 +453,12 @@ const Dashboard: NextPage = () => {
           isOpen={modalState.isOpen}
           handleOnClose={handleCloseModal}
           refetch={refetch}
+        />
+        <UserModal
+          isOpen={openUserInfo}
+          handleOnClose={handleCloseUserInfo}
+          userName={dataOrs?.data?.data?.user_name}
+          password={dataOrs?.data?.data?.password}
         />
       </Container>
     </>

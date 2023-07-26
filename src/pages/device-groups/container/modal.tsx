@@ -7,6 +7,8 @@ import {
   TextField,
   Typography,
   Stack,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import * as Yup from "yup";
 import React, { FC, useEffect, useState } from "react";
@@ -39,18 +41,26 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
   data,
   refetch,
 }) => {
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const handleCloseSnackBar = () => {
+    setOpenSnackBar(false);
+  };
+  const [content, setContent] = useState("");
+  const [isError, setError] = useState(false);
+
+  const initialValues = {
+    group_id: 0,
+    location_id: 0,
+    name: "",
+    description: "",
+    location_name: "",
+    latitude: 0,
+    longtitude: 0,
+  };
+
   const router = useRouter();
   const formik = useFormik({
-    initialValues: {
-      group_id: 0,
-      location_id: 0,
-      name: "",
-      description: "",
-      location_name: "",
-      latitude: 0,
-      longtitude: 0,
-    },
-    
+    initialValues: initialValues,
     onSubmit: (values) => {
       isEdit
         ? onUpdate({
@@ -79,18 +89,32 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
   });
 
   const handleOnDeleteGroup = (id: number) => {
-    const resp = deleteDeviceGroup(id).then(
-      result => (
-        console.log(result.data)
-      )
-    )
-  }
+    const resp = deleteDeviceGroup(id).then((result) => {
+      console.log("GROUP DELETE", result);
+      if (result.status !== 200) {
+        setOpenSnackBar(true);
+        setError(true);
+        setContent("Delete failed");
+        console.log("GROUP DELETE !200", result);
+      } else {
+        setOpenSnackBar(true);
+        setError(false);
+        setContent("Delete succeeded");
+        console.log("GROUP DELETE 200", result);
+      }
+    });
+  };
 
   useEffect(() => {
-    formik.setValues({
-      ...formik.values,
-      ...data,
-    });
+    if (isEdit) {
+      formik.setValues({
+        ...formik.values,
+        ...data,
+      });
+    } else {
+      formik.setValues(initialValues);
+    }
+
   }, [data, isEdit]);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
@@ -340,6 +364,29 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
             SAVE
           </Button>
         </Box>
+        <Snackbar
+          open={openSnackBar}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackBar}
+        >
+          {isError ? (
+            <Alert
+              onClose={handleCloseSnackBar}
+              severity="error"
+              sx={{ width: "100%" }}
+            >
+              {content}
+            </Alert>
+          ) : (
+            <Alert
+              onClose={handleCloseSnackBar}
+              severity="info"
+              sx={{ width: "100%" }}
+            >
+              {content}
+            </Alert>
+          )}
+        </Snackbar>
       </form>
     </Modal>
   );

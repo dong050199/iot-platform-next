@@ -134,7 +134,7 @@ const Device: NextPage = () => {
       {
         header: "Device ID",
         accessorKey: "device_id",
-        size: 70,
+        size: 120,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => (
           <>
@@ -176,23 +176,13 @@ const Device: NextPage = () => {
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {
           return (
-            <SeverityPill
-              color="primary"
-              style={{
-                minWidth: "100px",
-                backgroundColor: "#ec7211",
-              }}
-            >
-              <Typography sx={{ fontSize: "15px" }}>
-                {cell.getValue()}
-              </Typography>
-            </SeverityPill>
+            <Typography sx={{ fontSize: "15px" }}>{cell.getValue()}</Typography>
           );
         },
       },
       {
-        header: "Status",
-        accessorKey: "status",
+        header: "State",
+        accessorKey: "state",
         size: 200,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {

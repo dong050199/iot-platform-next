@@ -124,7 +124,9 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   }, []);
 
   const handleOnDeleteGroup = (id: number) => {
-    const resp = deleteDevice(id).then((result) => console.log(result.data));
+    const resp = deleteDevice(id).then((result) => {
+      console.log(result)
+    });
   };
 
   useEffect(() => {
@@ -223,10 +225,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     refetchGroupDevices();
   };
 
-  const haneldOnchangeAutoComplete = (event: any, data: any) => {
-    console.log(data);
-  };
-
   const handleSetFilter = (name: string) => {
     setFilter({
       page_size: PAGINATION.PAGE_SIZE,
@@ -273,7 +271,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
               }}
               onChange={(event, data) => {
                 setGroupSelected(data);
-                console.log(data);
                 formik.setFieldValue("group_id", data?.group_id || 0);
               }}
               onInputChange={(event, data) => {

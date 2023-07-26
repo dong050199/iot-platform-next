@@ -150,7 +150,7 @@ export const PersistentDrawerLeftComponent: React.FC<IappBarProps> = (
                 style={{ textTransform: "none" }}
                 sx={{ flexGrow: 1, fontSize: 22, color: "white" }}
               >
-                Hura IoT
+                Uraa IoT
               </Typography>
             </Button>
             <AccountButton email={userInfo?.email} name={userInfo?.name} />

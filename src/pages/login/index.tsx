@@ -34,6 +34,7 @@ import * as Yup from "yup";
 import { loginUser } from "../../services/authentication/authenticationService";
 import { ALERT_TYPE } from "../signup";
 import { getUserInfo } from "../../services/apis/users";
+import Head from "next/head";
 
 interface IUserLogin {
   email: string;
@@ -56,7 +57,7 @@ const Login: NextPage = () => {
       password: "",
     },
     onSubmit: (valuse) => {
-      onApply(valuse)
+      onApply(valuse);
     },
     validationSchema: Yup.object().shape({
       email: Yup.string()
@@ -74,15 +75,14 @@ const Login: NextPage = () => {
       router.push("/home");
     }
     if (message) {
-      setOpenSnackBar(true)
-      setContent(message as string)
+      setOpenSnackBar(true);
+      setContent(message as string);
     }
   }, [message]);
 
   const { mutate: onApply, isLoading: loadingUpdate } = useMutation(
     async (values: any) => {
       try {
-        console.log(values);
         const response: any = await loginUser(values);
         if (response?.status !== 200) {
           setAlertType(ALERT_TYPE.ERROR);
@@ -125,112 +125,117 @@ const Login: NextPage = () => {
   );
 
   return (
-    <Container className="login-container" component="main" maxWidth="sm">
-      <Paper>
-        <Box
-          sx={{
-            boxShadow: 3,
-            borderRadius: 2,
-            px: 4,
-            py: 6,
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography component="h1" variant="h3">
-            Sign In
-          </Typography>
-          <form onSubmit={formik.handleSubmit}>
-            <Box sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                error={Boolean(formik.errors.email)}
-                helperText={formik.errors.email as string}
-                type="text"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                error={Boolean(formik.errors.password)}
-                helperText={formik.errors.password as string}
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
-              >
-                Sign In
-              </Button>
-              <Button
-                startIcon={<GoogleIcon />}
-                href={getGoogleUrl("")}
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
-              >
-                Login with Google
-              </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
+    <>
+      <Head>
+        <title>Signin | Uraa</title>
+      </Head>
+      <Container className="login-container" component="main" maxWidth="sm">
+        <Paper>
+          <Box
+            sx={{
+              boxShadow: 3,
+              borderRadius: 2,
+              px: 4,
+              py: 6,
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography component="h1" variant="h3">
+              Sign In
+            </Typography>
+            <form onSubmit={formik.handleSubmit}>
+              <Box sx={{ mt: 1 }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  error={Boolean(formik.errors.email)}
+                  helperText={formik.errors.email as string}
+                  type="text"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  error={Boolean(formik.errors.password)}
+                  helperText={formik.errors.password as string}
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Remember me"
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  startIcon={<GoogleIcon />}
+                  href={getGoogleUrl("")}
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2, background: "#2E3B55" }}
+                >
+                  Login with Google
+                </Button>
+                <Grid container>
+                  <Grid item xs>
+                    <Link href="#" variant="body2">
+                      Forgot password?
+                    </Link>
+                  </Grid>
+                  <Grid item>
+                    <Link
+                      href="#"
+                      variant="body2"
+                      onClick={() => {
+                        router.push("/signup");
+                      }}
+                    >
+                      {"Don't have an account? Sign Up"}
+                    </Link>
+                  </Grid>
                 </Grid>
-                <Grid item>
-                  <Link
-                    href="#"
-                    variant="body2"
-                    onClick={() => {
-                      router.push("/signup");
-                    }}
-                  >
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
-              </Grid>
-            </Box>
-          </form>
-        </Box>
-      </Paper>
+              </Box>
+            </form>
+          </Box>
+        </Paper>
 
-      <Snackbar
-        open={openSnackBar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackBar}
-      >
-        <Alert
+        <Snackbar
+          open={openSnackBar}
+          autoHideDuration={6000}
           onClose={handleCloseSnackBar}
-          severity="info"
-          sx={{ width: "100%" }}
         >
-          {content}
-        </Alert>
-      </Snackbar>
-    </Container>
+          <Alert
+            onClose={handleCloseSnackBar}
+            severity="info"
+            sx={{ width: "100%" }}
+          >
+            {content}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </>
   );
 };
 

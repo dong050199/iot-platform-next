@@ -60,7 +60,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Home Page</title>
+        <title>Home Page | Uraa</title>
       </Head>
       <Box
         display={"flex"}

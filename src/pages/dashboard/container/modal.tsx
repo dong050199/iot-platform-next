@@ -59,7 +59,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   const handleAddDatasource = (id: number) => {
     const resp = addDeviceDatasource(id).then((result) => {
       if (result.status !== 200) {
-        // console.log(result.data.message);
       }
     });
   };
@@ -83,7 +82,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   const handleOnDeleteDeviceDatasource = (id: number) => {
     const resp = deleteDeviceDatasource(id).then((result) => {
       if (result.status !== 200) {
-        // console.log(resp.data.message);
       }
     });
   };
@@ -146,7 +144,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
               return option.name;
             }}
             onInputChange={(event, data) => {
-              handleSetFilter(data || "")
+              handleSetFilter(data || "");
             }}
             onChange={(event, data) => {
               setDeviceIDSelected(data?.device_id || 0);
@@ -195,7 +193,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
               "&:hover": { backgroundColor: "#ec7211" },
             }}
             onClick={() => {
-
               handleOnDeleteDeviceDatasource(data?.device_id);
               handleOnClose();
               refetch();
@@ -228,11 +225,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             variant="outlined"
             color="inherit"
             size="large"
-            onClick={()=> {
-              if (deviceIDSelected === 0) {
-                handleOnClose();
-                return 
-              }
+            onClick={() => {
               handleAddDatasource(deviceIDSelected);
               handleOnClose();
               refetch();

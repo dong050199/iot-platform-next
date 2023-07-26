@@ -25,7 +25,6 @@ baseRequest.interceptors.request.use(
 
 baseRequest.interceptors.response.use(
   (response) => {
-    console.log(response);
     if (response?.status === 401) {
       const router = useRouter();
       router.push(PATH.LOGIN)
@@ -33,7 +32,6 @@ baseRequest.interceptors.response.use(
     return response
   },
   (error) => {
-    console.log(error?.response?.status);
     if ( error?.response?.status === 401) {
       removeAccessToken();
       removeUserInfoFromCookie();

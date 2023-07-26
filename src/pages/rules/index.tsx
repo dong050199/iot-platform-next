@@ -171,7 +171,6 @@ const Rules: NextPage = () => {
             <Button
               style={{ textTransform: "none" }}
               onClick={() => {
-                console.log(row.original);
                 setModalState({
                   isEdit: true,
                   isOpen: true,
@@ -192,27 +191,6 @@ const Rules: NextPage = () => {
       {
         header: "Topic",
         accessorKey: "topic",
-        size: 200,
-        typeFilter: "includesMultipleFilter",
-        Cell: ({ cell, row }: any) => {
-          return (
-            <SeverityPill
-              color="primary"
-              style={{
-                minWidth: "100px",
-                backgroundColor: "#ec7211",
-              }}
-            >
-              <Typography sx={{ fontSize: "15px" }}>
-                {cell.getValue()}
-              </Typography>
-            </SeverityPill>
-          );
-        },
-      },
-      {
-        header: "Status",
-        accessorKey: "status",
         size: 200,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {
@@ -262,7 +240,7 @@ const Rules: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Dashboard | Uraa</title>
+        <title>Rule | Uraa</title>
       </Head>
       <Box
         sx={{
