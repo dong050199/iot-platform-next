@@ -35,6 +35,9 @@ import * as Yup from "yup";
 import { getListDevices } from "../../services/apis/deviceGroup";
 import { getUserInfoFromCookie } from "../../utils/cookies";
 import Login from "../login";
+import { SnackBar, SnackBarProps } from "../../components/toast/snack-bar";
+import { TrendingUpSharp } from "@mui/icons-material";
+import { fail } from "assert";
 
 export interface FilterBase {
   page_size?: number;
@@ -53,6 +56,12 @@ const DeviceGroup: NextPage = () => {
     if (!!!email) {
       router.push("/login?message=You must login to access this resource.");
     }
+  });
+
+  const [snackBarProps, setSnackarProps] = useState<SnackBarProps>({
+    content: "",
+    messageType: "",
+    timeToast: 0,
   });
 
   const [modalState, setModalState] = useState<IAddDeviceGroupModalProps>({
@@ -389,7 +398,9 @@ const DeviceGroup: NextPage = () => {
           isOpen={modalState.isOpen}
           handleOnClose={handleCloseModal}
           refetch={refetch}
+          setSnackBar={setSnackarProps}
         />
+        <SnackBar {...snackBarProps} />
       </Container>
     </>
   );

@@ -30,6 +30,7 @@ import { PAGINATION } from "../../../constants/pagination";
 import {
   createDevice,
   deleteDevice,
+  getListDevice,
   updateDevice,
 } from "../../../services/apis/device";
 import {
@@ -50,6 +51,7 @@ export interface IAddRuleModalProps {
   isEdit: boolean;
   data: any;
   refetch?: any;
+  setSnackBar?: any;
 }
 
 export const AddRuleModal: FC<IAddRuleModalProps> = ({
@@ -58,23 +60,30 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
   isEdit,
   data,
   refetch,
+  setSnackBar,
 }) => {
+  // clear snackbar
+  useEffect(() => {
+    if (isOpen) {
+      setSnackBar({});
+    }
+  }, []);
+
   const router = useRouter();
-  const [deviceIDSelected, setDeviceIDSelected] = useState(0);
   const options = ["EQUAL", "NOT EQUAL", "GREATER THAN", "LESS THAN"];
 
   const [value1, setValue1] = useState<string | null>(options[0]);
   const [inputValue1, setInputValue1] = useState("");
-
+  const initialValues = {
+    device_id: 0,
+    rule_id: 0,
+    name: "",
+    attribute: "",
+    comparison: "",
+    rule_value: 0,
+  };
   const formik = useFormik({
-    initialValues: {
-      device_id: 0,
-      rule_id: 0,
-      name: "",
-      attribute: "",
-      comparison: "",
-      rule_value: 0,
-    },
+    initialValues: initialValues,
     onSubmit: (values) => {
       isEdit
         ? onUpdate({
@@ -97,9 +106,9 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
       refetch();
     },
     validationSchema: Yup.object().shape({
-      // device_id: Yup.number()
-      //   .min(1, "Please select valid device")
-      //   .required("Please select device to add rule"),
+      device_id: Yup.number()
+        .min(1, "Please select valid device")
+        .required("Please select device to add rule"),
       name: Yup.string().required("Name is required"),
       attribute: Yup.string().required("Atribute is required"),
       comparison: Yup.string().required("Please slect valid comparision"),
@@ -120,32 +129,37 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
         rule_value: data.rule_value,
       });
     } else {
+      formik.setValues(initialValues);
     }
-  }, []);
+  }, [data, isEdit]);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
     async (values: any) => {
       try {
         const response: any = await createRule(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Create device failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Create rule failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions("success", "Create device success!", <DoneAllIcon />);
+          setSnackBar({
+            content: "Create rule succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Create device failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Create rule failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -156,28 +170,28 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
       try {
         const response: any = await updateRule(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Update device group failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Update rule failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions(
-            "success",
-            "Update device group success!",
-            <DoneAllIcon />
-          );
+          setSnackBar({
+            content: "Uddate rule succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Update device group failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Update rule failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -206,7 +220,7 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
   } = useQuery(
     [`list-device-rules`],
     async () => {
-      let response = await getListDevicesRule({ filter });
+      let response = await getListDevice({ filter });
       // if result not null set to map
       if (response.status == 200 && response.data.data.devices != null) {
         return response;
@@ -219,8 +233,20 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
   );
 
   const handleDeleteRule = (id: number) => {
-    const resp = deleteRule(id).then((result) =>{
-      console.log(result.data)
+    const resp = deleteRule(id).then((result) => {
+      if (result.status !== 200) {
+        setSnackBar({
+          content: "Delete rule failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
+      } else {
+        setSnackBar({
+          content: "Delete rule succeeded",
+          messageType: "success",
+          timeToast: Date.now(),
+        });
+      }
     });
   };
 
@@ -338,7 +364,7 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
               }}
               inputValue={inputValue1}
               onInputChange={(event, newInputValue) => {
-                if(event) {
+                if (event) {
                   formik.setFieldValue("comparison", newInputValue || "");
                   setInputValue1(newInputValue);
                 }
@@ -430,7 +456,7 @@ export const AddRuleModal: FC<IAddRuleModalProps> = ({
             color="inherit"
             size="large"
             type="submit"
-            onClick={() =>{
+            onClick={() => {
               formik.submitForm();
             }}
             sx={{

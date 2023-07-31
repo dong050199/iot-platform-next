@@ -34,31 +34,44 @@ import { getUserInfoFromCookie } from "../../utils/cookies";
 import Login from "../login";
 import { FilterBase } from "../device-groups";
 import { getListDevice } from "../../services/apis/device";
+import { getUsage } from "../../services/apis/usage";
 
 const Rules: NextPage = () => {
   const router = useRouter();
+
+  const { data, isFetching, refetch } = useQuery(
+    [`usage`],
+    async () => getUsage(),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+    console.log(data?.data)
+
   const ourSolutions = [
     {
       title: "Number Device Created",
-      content: 1,
       button: "Visit Device",
       path: "/devices",
+      content: data?.data?.data?.device_created
     },
     {
       title: "Grafana Datasource",
-      content: 10,
+      content: data?.data?.data?.datasource_created,
       button: "Visit Dashboard",
       path: "/dashboard",
     },
     {
       title: "Group Devices",
-      content: 11,
+      content: data?.data?.data?.group_created,
       button: "Visit Group Devices",
       path: "/device-groups",
     },
     {
       title: "Rule Created",
-      content: 12,
+      content: data?.data?.data?.device_created,
       button: "Visit Rule",
       path: "/rules",
     },

@@ -25,6 +25,7 @@ import DoneAllIcon from "@mui/icons-material/DoneAll";
 import { useRouter } from "next/router";
 import { Modal } from "../../../components/modal";
 import { result } from "lodash";
+import { SnackBarProps } from "../../../components/toast/snack-bar";
 
 export interface IAddDeviceGroupModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export interface IAddDeviceGroupModalProps {
   isEdit: boolean;
   data: any;
   refetch?: any;
+  setSnackBar?: any;
 }
 
 export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
@@ -40,13 +42,14 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
   isEdit,
   data,
   refetch,
+  setSnackBar,
 }) => {
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const handleCloseSnackBar = () => {
-    setOpenSnackBar(false);
-  };
-  const [content, setContent] = useState("");
-  const [isError, setError] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSnackBar({})
+    }
+  },[isOpen])
 
   const initialValues = {
     group_id: 0,
@@ -58,7 +61,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
     longtitude: 0,
   };
 
-  const router = useRouter();
   const formik = useFormik({
     initialValues: initialValues,
     onSubmit: (values) => {
@@ -90,17 +92,18 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
 
   const handleOnDeleteGroup = (id: number) => {
     const resp = deleteDeviceGroup(id).then((result) => {
-      console.log("GROUP DELETE", result);
       if (result.status !== 200) {
-        setOpenSnackBar(true);
-        setError(true);
-        setContent("Delete failed");
-        console.log("GROUP DELETE !200", result);
+        setSnackBar({
+          content: "Delete group failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
       } else {
-        setOpenSnackBar(true);
-        setError(false);
-        setContent("Delete succeeded");
-        console.log("GROUP DELETE 200", result);
+        setSnackBar({
+          content: "Delete group succeeded",
+          messageType: "success",
+          timeToast: Date.now(),
+        });
       }
     });
   };
@@ -114,7 +117,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
     } else {
       formik.setValues(initialValues);
     }
-
   }, [data, isEdit]);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
@@ -122,28 +124,28 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
       try {
         const response: any = await createDeviceGroup(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Create device group failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Create device group failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions(
-            "success",
-            "Create device group success!",
-            <DoneAllIcon />
-          );
+          setSnackBar({
+            content: "Create device group succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Create device group failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Create device group failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -154,28 +156,28 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
       try {
         const response: any = await updateDeviceGroup(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Update device group failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Update device group failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions(
-            "success",
-            "Update device group success!",
-            <DoneAllIcon />
-          );
+          setSnackBar({
+            content: "Update device group succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Update device group failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Update device group failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -203,14 +205,14 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
           Create Group Device
         </Typography>
       )}
-      <form onSubmit={formik.handleSubmit}>
+      <form onSubmit={formik.handleSubmit} autoComplete="off">
         <TextField
           sx={{
             m: "20px",
             width: "95%",
           }}
+          autoComplete="new-password"
           error={Boolean(formik.errors.name)}
-          helperText={formik.errors.name}
           type="text"
           name="name"
           value={formik.values.name}
@@ -225,8 +227,8 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
             m: "20px",
             width: "95%",
           }}
+          autoComplete="off"
           error={Boolean(formik.errors.description)}
-          helperText={formik.errors.description}
           type="text"
           name="description"
           value={formik.values.description}
@@ -241,8 +243,8 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
             m: "20px",
             width: "95%",
           }}
+          autoComplete="off"
           error={Boolean(formik.errors.location_name)}
-          helperText={formik.errors.location_name}
           type="text"
           name="location_name"
           value={formik.values.location_name}
@@ -255,6 +257,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
         <Grid sx={{ width: "100%" }} container spacing={1}>
           <Grid item>
             <TextField
+              autoComplete="off"
               sx={{
                 m: "20px",
                 width: "200px",
@@ -271,6 +274,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
           </Grid>
           <Grid item>
             <TextField
+              autoComplete="off"
               sx={{
                 m: "20px",
                 width: "200px",
@@ -364,29 +368,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceGroupModalProps> = ({
             SAVE
           </Button>
         </Box>
-        <Snackbar
-          open={openSnackBar}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackBar}
-        >
-          {isError ? (
-            <Alert
-              onClose={handleCloseSnackBar}
-              severity="error"
-              sx={{ width: "100%" }}
-            >
-              {content}
-            </Alert>
-          ) : (
-            <Alert
-              onClose={handleCloseSnackBar}
-              severity="info"
-              sx={{ width: "100%" }}
-            >
-              {content}
-            </Alert>
-          )}
-        </Snackbar>
       </form>
     </Modal>
   );

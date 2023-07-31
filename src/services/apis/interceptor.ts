@@ -38,7 +38,7 @@ baseRequest.interceptors.response.use(
     }
     return {
       errorMessage: error?.message,
-      quanQUE: error?.status_code
+      errorContent: error?.response?.data?.message
     };
   }
 );

@@ -23,7 +23,6 @@ import { SeverityPill } from "../../components/severity-pill";
 import Head from "next/head";
 import { Skeleton } from "../../components/skeleton";
 import { MuiTable } from "../../components/mui-table";
-import AddDeviceGroupModal, { IAddDeviceModalProps } from "./container/modal";
 import { useQuery } from "react-query";
 import { getPagination } from "../../utils/pagination";
 import { PAGINATION } from "../../constants/pagination";
@@ -42,8 +41,17 @@ import {
 import LoginIcon from "@mui/icons-material/Login";
 import UserModal from "./container/userInfoModal";
 import { Password } from "@mui/icons-material";
+import { SnackBar, SnackBarProps } from "../../components/toast/snack-bar";
+import AddDeviceDatasourceModal, { AddDeviceDatasourceProps } from "./container/modal";
 
 const Dashboard: NextPage = () => {
+
+  const [snackBarProps, setSnackarProps] = useState<SnackBarProps>({
+    content: "",
+    messageType: "",
+    timeToast: 0,
+  });
+
   const router = useRouter();
   const { email, name } = getUserInfoFromCookie();
   useEffect(() => {
@@ -54,7 +62,7 @@ const Dashboard: NextPage = () => {
 
   const [showLoginInfo, setShowLoginInfo] = useState(false);
 
-  const [modalState, setModalState] = useState<IAddDeviceModalProps>({
+  const [modalState, setModalState] = useState<AddDeviceDatasourceProps>({
     isOpen: false,
     isEdit: false,
     data: {},
@@ -186,27 +194,6 @@ const Dashboard: NextPage = () => {
             </Button>
           </>
         ),
-      },
-      {
-        header: "Topic",
-        accessorKey: "topic",
-        size: 200,
-        typeFilter: "includesMultipleFilter",
-        Cell: ({ cell, row }: any) => {
-          return (
-            <SeverityPill
-              color="primary"
-              style={{
-                minWidth: "100px",
-                backgroundColor: "#ec7211",
-              }}
-            >
-              <Typography sx={{ fontSize: "15px" }}>
-                {cell.getValue()}
-              </Typography>
-            </SeverityPill>
-          );
-        },
       },
       {
         header: "State",
@@ -447,12 +434,13 @@ const Dashboard: NextPage = () => {
             />
           </Box>
         </Skeleton>
-        <AddDeviceGroupModal
+        <AddDeviceDatasourceModal
           isEdit={modalState.isEdit}
           data={modalState.data}
           isOpen={modalState.isOpen}
           handleOnClose={handleCloseModal}
           refetch={refetch}
+          setSnackBar={setSnackarProps}
         />
         <UserModal
           isOpen={openUserInfo}
@@ -460,6 +448,7 @@ const Dashboard: NextPage = () => {
           userName={dataOrs?.data?.data?.user_name}
           password={dataOrs?.data?.data?.password}
         />
+        <SnackBar {...snackBarProps} />
       </Container>
     </>
   );

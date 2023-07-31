@@ -44,8 +44,14 @@ import {
 } from "../../services/apis/organization";
 import LoginIcon from "@mui/icons-material/Login";
 import { getListRule } from "../../services/apis/rule";
+import { SnackBar, SnackBarProps } from "../../components/toast/snack-bar";
 
 const Rules: NextPage = () => {
+  const [snackBarProps, setSnackarProps] = useState<SnackBarProps>({
+    content: "",
+    messageType: "",
+    timeToast: 0,
+  });
   const router = useRouter();
   const { email, name } = getUserInfoFromCookie();
   useEffect(() => {
@@ -189,23 +195,13 @@ const Rules: NextPage = () => {
         ),
       },
       {
-        header: "Topic",
-        accessorKey: "topic",
+        header: "Device ID",
+        accessorKey: "device_id",
         size: 200,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {
           return (
-            <SeverityPill
-              color="primary"
-              style={{
-                minWidth: "100px",
-                backgroundColor: "#ec7211",
-              }}
-            >
-              <Typography sx={{ fontSize: "15px" }}>
-                {cell.getValue()}
-              </Typography>
-            </SeverityPill>
+            <Typography sx={{ fontSize: "15px" }}>{cell.getValue()}</Typography>
           );
         },
       },
@@ -412,7 +408,9 @@ const Rules: NextPage = () => {
           isOpen={modalState.isOpen}
           handleOnClose={handleCloseModal}
           refetch={refetch}
+          setSnackBar={setSnackarProps}
         />
+        <SnackBar {...snackBarProps} />
       </Container>
     </>
   );

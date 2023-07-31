@@ -25,7 +25,7 @@ export default function Footer() {
               About Us
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              We are DEF Team , dedicated to providing the best service to our
+              We are Uraa Team , dedicated to providing the best service to our
               customers.
             </Typography>
           </Grid>

@@ -23,7 +23,7 @@ import { SeverityPill } from "../../components/severity-pill";
 import Head from "next/head";
 import { Skeleton } from "../../components/skeleton";
 import { MuiTable } from "../../components/mui-table";
-import AddDeviceGroupModal, { IAddDeviceModalProps } from "./container/modal";
+import AddDeviceGroupModal, { AddDeviceModal, IAddDeviceModalProps } from "./container/modal";
 import { useQuery } from "react-query";
 import { getPagination } from "../../utils/pagination";
 import { PAGINATION } from "../../constants/pagination";
@@ -35,8 +35,16 @@ import { getUserInfoFromCookie } from "../../utils/cookies";
 import Login from "../login";
 import { FilterBase } from "../device-groups";
 import { getListDevice } from "../../services/apis/device";
+import { SnackBar, SnackBarProps } from "../../components/toast/snack-bar";
 
 const Device: NextPage = () => {
+
+  const [snackBarProps, setSnackarProps] = useState<SnackBarProps>({
+    content: "",
+    messageType: "",
+    timeToast: 0,
+  });
+
   const router = useRouter();
   const { email, name } = getUserInfoFromCookie();
   useEffect(() => {
@@ -169,21 +177,11 @@ const Device: NextPage = () => {
           </>
         ),
       },
-      {
-        header: "Topic",
-        accessorKey: "topic",
-        size: 200,
-        typeFilter: "includesMultipleFilter",
-        Cell: ({ cell, row }: any) => {
-          return (
-            <Typography sx={{ fontSize: "15px" }}>{cell.getValue()}</Typography>
-          );
-        },
-      },
+      
       {
         header: "State",
         accessorKey: "state",
-        size: 200,
+        size: 120,
         typeFilter: "includesMultipleFilter",
         Cell: ({ cell, row }: any) => {
           return (
@@ -200,6 +198,17 @@ const Device: NextPage = () => {
             </SeverityPill>
           );
         },
+      },
+      {
+        header: "Group ID",
+        accessorKey: "group_id",
+        size: 100,
+        typeFilter: "includesMultipleFilter",
+        Cell: ({ cell, row }: any) => (
+          <>
+            <Typography sx={{ fontSize: "15px" }}>{cell.getValue()}</Typography>
+          </>
+        ),
       },
       {
         header: "Created At",
@@ -349,13 +358,15 @@ const Device: NextPage = () => {
             />
           </Box>
         </Skeleton>
-        <AddDeviceGroupModal
+        <AddDeviceModal
           isEdit={modalState.isEdit}
           data={modalState.data}
           isOpen={modalState.isOpen}
           handleOnClose={handleCloseModal}
           refetch={refetch}
+          setSnackBar={setSnackarProps}
         />
+        <SnackBar {...snackBarProps} />
       </Container>
     </>
   );

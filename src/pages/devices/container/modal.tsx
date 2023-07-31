@@ -39,31 +39,37 @@ export interface IAddDeviceModalProps {
   isEdit: boolean;
   data: any;
   refetch?: any;
+  setSnackBar?: any;
 }
 
-export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
+export const AddDeviceModal: FC<IAddDeviceModalProps> = ({
   isOpen,
   handleOnClose,
   isEdit,
   data,
   refetch,
+  setSnackBar,
 }) => {
-  const [groupID, setGroupID] = useState(0);
-  const router = useRouter();
-  const [groupSelected, setGroupSelected] = useState<any>({});
+  // clear snackbar
+  useEffect(() => {
+    if (isOpen) {
+      setSnackBar({})
+    }
+  },[])
 
+
+  const initialValues = {
+    device_id: 0,
+    profile_id: 0,
+    group_id: 0,
+    name: "",
+    description: "",
+    state: "",
+    user_name: "",
+    password: "",
+  };
   const formik = useFormik({
-    initialValues: {
-      device_id: 0,
-      profile_id: 0,
-      group_id: 0,
-      name: "",
-      description: "",
-      topic: "",
-      state: "",
-      user_name: "",
-      password: "",
-    },
+    initialValues: initialValues,
     onSubmit: (values) => {
       isEdit
         ? onUpdate({
@@ -72,7 +78,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             group_id: formik.values.group_id,
             name: values.name,
             description: values.description,
-            topic: values.topic,
             state: values.state,
             user_name: values.user_name,
             password: values.password,
@@ -83,7 +88,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             group_id: formik.values.group_id,
             name: values.name,
             description: values.description,
-            topic: values.topic,
             state: values.state,
             user_name: values.user_name,
             password: values.password,
@@ -96,7 +100,6 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
         .required("Please select group of devices"),
       name: Yup.string().required("Name is required"),
       description: Yup.string().required("Description is required"),
-      topic: Yup.string().required("Please create topic for this device"),
       user_name: Yup.string()
         .required("User name is require for device")
         .min(8, "User name must be at least 8 characters"),
@@ -114,51 +117,61 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
         group_id: data.group_id,
         name: data.name,
         description: data.description,
-        topic: data.topic,
         state: data.state,
         user_name: data.user_name,
         password: data.password,
       });
     } else {
+      formik.setValues(initialValues);
     }
-  }, []);
+  }, [data, isEdit]);
+
 
   const handleOnDeleteGroup = (id: number) => {
     const resp = deleteDevice(id).then((result) => {
-      console.log(result)
+      if (result.status !== 200) {
+        setSnackBar({
+          content: "Delete device failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
+      } else {
+        setSnackBar({
+          content: "Delete device succeeded",
+          messageType: "success",
+          timeToast: Date.now(),
+        });
+      }
     });
   };
-
-  useEffect(() => {
-    formik.setValues({
-      ...formik.values,
-      ...data,
-    });
-  }, [data, isEdit]);
 
   const { mutate: onCreate, isLoading: loadingCreate } = useMutation(
     async (values: any) => {
       try {
         const response: any = await createDevice(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Create device failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Create device failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions("success", "Create device success!", <DoneAllIcon />);
+          setSnackBar({
+            content: "Create device succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Create device failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Create device failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -194,28 +207,28 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
       try {
         const response: any = await updateDevice(values);
         if (response?.status !== 200) {
-          toastOptions(
-            "error",
-            response?.message ?? "Update device group failed",
-            <PriorityHighIcon />
-          );
+          setSnackBar({
+            content: response?.errorContent || "Update device failed",
+            messageType: "error",
+            timeToast: Date.now(),
+          });
           return false;
         } else {
-          toastOptions(
-            "success",
-            "Update device group success!",
-            <DoneAllIcon />
-          );
+          setSnackBar({
+            content: "Update device succeeded",
+            messageType: "success",
+            timeToast: Date.now(),
+          });
           refetch && refetch();
           handleOnClose();
           return true;
         }
       } catch (error: any) {
-        toastOptions(
-          "error",
-          error?.message ?? "Update device group failed",
-          <PriorityHighIcon />
-        );
+        setSnackBar({
+          content: "Update device failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
         return false;
       }
     }
@@ -270,11 +283,10 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
                 return option.name;
               }}
               onChange={(event, data) => {
-                setGroupSelected(data);
                 formik.setFieldValue("group_id", data?.group_id || 0);
               }}
               onInputChange={(event, data) => {
-                handleSetFilter(data || "")
+                handleSetFilter(data || "");
               }}
               onKeyDown={(event) => {
                 // search when enter key is pressed
@@ -305,6 +317,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             m: "20px",
             width: "95%",
           }}
+          autoComplete="new-password"
           error={Boolean(formik.errors.name)}
           helperText={formik.errors.name}
           type="text"
@@ -321,6 +334,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             m: "20px",
             width: "95%",
           }}
+          autoComplete="new-password"
           error={Boolean(formik.errors.description)}
           helperText={formik.errors.description}
           type="text"
@@ -332,28 +346,12 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
           size="small"
           variant="filled"
         />
-
         <TextField
           sx={{
             m: "20px",
             width: "95%",
           }}
-          error={Boolean(formik.errors.topic)}
-          helperText={formik.errors.topic}
-          type="text"
-          name="topic"
-          value={formik.values.topic}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          label="Device Topic - For MQTT Only"
-          size="small"
-          variant="filled"
-        />
-        <TextField
-          sx={{
-            m: "20px",
-            width: "95%",
-          }}
+          autoComplete="new-password"
           error={Boolean(formik.errors.user_name)}
           helperText={formik.errors.user_name}
           type="text"
@@ -361,7 +359,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
           value={formik.values.user_name}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          label="User Name To Connect This Device"
+          label="User Name"
           size="small"
           variant="filled"
         />
@@ -370,6 +368,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
             m: "20px",
             width: "95%",
           }}
+          autoComplete="new-password"
           error={Boolean(formik.errors.password)}
           helperText={formik.errors.password}
           type="text"
@@ -377,7 +376,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          label="Password To Connect This Device"
+          label="Password"
           size="small"
           variant="filled"
         />
@@ -449,4 +448,4 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   );
 };
 
-export default AddDeviceGroupModal;
+export default AddDeviceModal;

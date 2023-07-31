@@ -38,27 +38,46 @@ import {
   getListDeviceAddDatasource,
 } from "../../../services/apis/organization";
 
-export interface IAddDeviceModalProps {
+export interface AddDeviceDatasourceProps {
   isOpen: boolean;
   handleOnClose?: any;
   isEdit: boolean;
   data: any;
   refetch?: any;
+  setSnackBar?: any;
 }
 
-export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
+export const AddDeviceDatasourceModal: FC<AddDeviceDatasourceProps> = ({
   isOpen,
   handleOnClose,
   isEdit,
   data,
   refetch,
+  setSnackBar,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      setSnackBar({});
+    }
+  }, [isOpen]);
+
   const router = useRouter();
   const [deviceIDSelected, setDeviceIDSelected] = useState(0);
 
   const handleAddDatasource = (id: number) => {
     const resp = addDeviceDatasource(id).then((result) => {
       if (result.status !== 200) {
+        setSnackBar({
+          content: "Add datasoure failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
+      } else {
+        setSnackBar({
+          content: "Add datasource succeeded",
+          messageType: "success",
+          timeToast: Date.now(),
+        });
       }
     });
   };
@@ -82,6 +101,17 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   const handleOnDeleteDeviceDatasource = (id: number) => {
     const resp = deleteDeviceDatasource(id).then((result) => {
       if (result.status !== 200) {
+        setSnackBar({
+          content: "Remove datasoure failed",
+          messageType: "error",
+          timeToast: Date.now(),
+        });
+      } else {
+        setSnackBar({
+          content: "Remove datasource succeeded",
+          messageType: "success",
+          timeToast: Date.now(),
+        });
       }
     });
   };
@@ -91,7 +121,7 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
     isFetching,
     refetch: refetchDevices,
   } = useQuery(
-    [`list-device-devicess`],
+    [`list-device-devices-selected`, isOpen],
     async () => {
       let response = await getListDeviceAddDatasource({ filter });
       // if result not null set to map
@@ -247,4 +277,4 @@ export const AddDeviceGroupModal: FC<IAddDeviceModalProps> = ({
   );
 };
 
-export default AddDeviceGroupModal;
+export default AddDeviceDatasourceModal;
