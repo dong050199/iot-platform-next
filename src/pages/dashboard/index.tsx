@@ -295,7 +295,7 @@ const Dashboard: NextPage = () => {
                 backgroundColor: "#ec7211",
                 "&:hover": { backgroundColor: "#ec7211" },
               }}
-              href="http://localhost:3001"
+              href={process.env.NEXT_PUBLIC_GRAFANA_URL as string}
               rel="noopener noreferrer"
               target="_blank"
             >
